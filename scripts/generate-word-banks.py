@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "work" / "ECDICT" / "ecdict.csv"
+EXAMPLE_SOURCE = ROOT / "work" / "cmn-eng-v1" / "cmn.txt"
 OUTPUT = ROOT / "public" / "data"
 
 TARGETS = {
@@ -84,6 +85,26 @@ def choose(rows, count, predicates):
     return selected
 
 
+def load_examples(words):
+    examples = {}
+    scores = {}
+    with EXAMPLE_SOURCE.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            fields = line.rstrip("\n").split("\t")
+            if len(fields) < 3:
+                continue
+            english, chinese, attribution = fields[:3]
+            tokens = re.findall(r"[a-z][a-z'-]*", english.lower())
+            if len(tokens) < 3 or len(tokens) > 16:
+                continue
+            sentence_score = (0 if 5 <= len(tokens) <= 12 else 1, abs(len(tokens) - 8), len(english))
+            for word in set(tokens) & words:
+                if word not in scores or sentence_score < scores[word]:
+                    scores[word] = sentence_score
+                    examples[word] = {"e": english, "z": chinese, "a": attribution}
+    return examples
+
+
 def main():
     rows = load_rows()
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -96,12 +117,27 @@ def main():
         "cet6": [lambda x: "cet6" in x["tags"]],
         "ielts": [lambda x: "ielts" in x["tags"]],
     }
+    selections = {library_id: choose(rows, count, plans[library_id]) for library_id, count in TARGETS.items()}
+    target_words = {item["w"] for words in selections.values() for item in words}
+    examples = load_examples(target_words)
     manifest = {}
     for library_id, count in TARGETS.items():
-        words = choose(rows, count, plans[library_id])
+        words = selections[library_id]
+        matched = 0
+        for item in words:
+            example = examples.get(item["w"])
+            if example:
+                item.update(example)
+                matched += 1
+            else:
+                item.update({
+                    "e": f'We learned the word "{item["w"]}" in today\'s lesson.',
+                    "z": f'我们在今天的课上学习了“{item["w"]}”这个单词。',
+                    "a": "",
+                })
         destination = OUTPUT / f"{library_id}.json"
         destination.write_text(json.dumps(words, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        manifest[library_id] = {"count": len(words), "bytes": destination.stat().st_size}
+        manifest[library_id] = {"count": len(words), "examples": matched, "bytes": destination.stat().st_size}
     (OUTPUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(manifest, ensure_ascii=False, indent=2))
 

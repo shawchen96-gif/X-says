@@ -18,9 +18,11 @@ type Word = {
   meaning: string;
   example: string;
   translation: string;
+  definition?: string;
+  attribution?: string;
 };
 
-type CompactWord = { w: string; p: string; t: string; m: string; d: string };
+type CompactWord = { w: string; p: string; t: string; m: string; d: string; e: string; z: string; a: string };
 
 const libraries: Library[] = [
   { id: "primary", title: "小学核心词汇", subtitle: "趣味启蒙 · 课本同步", total: 600, level: "PRIMARY", tone: "sky" },
@@ -199,6 +201,7 @@ export default function WordApp() {
   const [hasSavedSession, setHasSavedSession] = useState(false);
   const [languagePackId, setLanguagePackId] = useState("us");
   const [showLanguagePacks, setShowLanguagePacks] = useState(false);
+  const [showDefinition, setShowDefinition] = useState(false);
   const [wordCache, setWordCache] = useState<Record<string, Word[]>>({});
   const [wordLoading, setWordLoading] = useState(true);
   const [wordError, setWordError] = useState("");
@@ -262,8 +265,10 @@ export default function WordApp() {
           phonetic: item.p ? `/${item.p.replace(/^\/+|\/+$/g, "")}/` : "",
           part: item.t || "",
           meaning: item.m,
-          example: item.d,
-          translation: item.m,
+          example: item.e,
+          translation: item.z,
+          definition: item.d,
+          attribution: item.a,
         }));
         if (!cancelled) setWordCache((currentCache) => ({ ...currentCache, [library.id]: words }));
       })
@@ -311,12 +316,14 @@ export default function WordApp() {
     setReview(canResume ? parsed.review : 0);
     setHasSavedSession(Boolean(canResume));
     setFlipped(false);
+    setShowDefinition(false);
     setScreen("study");
   };
 
   const answer = (remembered: boolean) => {
     if (answerLock.current) return;
     answerLock.current = true;
+    setShowDefinition(false);
     const nextIndex = index + 1;
     const nextKnown = known + (remembered ? 1 : 0);
     const nextReview = review + (remembered ? 0 : 1);
@@ -481,7 +488,7 @@ export default function WordApp() {
                 </ol>
                 {visibleWords < filteredWords.length && <button className="load-more" onClick={() => setVisibleWords((count) => count + 60)}>再显示 60 个</button>}
                 {!filteredWords.length && <div className="wordlist-state">没有找到相关单词</div>}
-                <p className="dictionary-source">释义与音标基于 ECDICT 开放词典（MIT License）整理</p>
+                <p className="dictionary-source">释义与音标基于 ECDICT；双语例句来自 Tatoeba 开放语料</p>
                 <button className="primary-button wordlist-use" onClick={() => setScreen("plan")}>使用这本词书 <span>→</span></button>
               </>
             )}
@@ -547,7 +554,8 @@ export default function WordApp() {
                   {flipped ? (
                     <div className="definition reveal">
                       <p><b>{current.part}</b> {current.meaning}</p>
-                      <div className="example"><span>ENGLISH DEFINITION</span><q>{current.example}</q><small>{current.translation}</small><div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听英文释义</button></div></div>
+                      <div className="example"><span>EXAMPLE</span><q>{current.example}</q><small>{current.translation}</small>{current.attribution && <small className="example-source">{current.attribution.replace("CC-BY 2.0 (France) Attribution: ", "Tatoeba · ")}</small>}<div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听例句</button></div></div>
+                      {current.definition && <button className="definition-info-button" onClick={(event) => { event.stopPropagation(); setShowDefinition(true); }} aria-label="查看英文释义"><span aria-hidden="true">i</span> 英文释义</button>}
                     </div>
                   ) : (
                     <div className="tap-hint"><span>↻</span> 点击卡片查看释义</div>
@@ -605,6 +613,19 @@ export default function WordApp() {
                 ))}
               </div>
               <button className="sheet-close" onClick={() => setShowLanguagePacks(false)}>完成</button>
+            </section>
+          </div>
+        )}
+
+        {showDefinition && screen === "study" && (
+          <div className="definition-overlay" role="presentation" onClick={() => setShowDefinition(false)}>
+            <section className="definition-dialog" role="dialog" aria-modal="true" aria-label={`${current.word} 的英文释义`} onClick={(event) => event.stopPropagation()}>
+              <button className="definition-close" onClick={() => setShowDefinition(false)} aria-label="关闭英文释义">×</button>
+              <span className="mini-label">ENGLISH DEFINITION</span>
+              <h2>{current.word}</h2>
+              <p>{current.definition}</p>
+              <small>{current.part} {current.meaning}</small>
+              <button className="definition-done" onClick={() => setShowDefinition(false)}>关闭</button>
             </section>
           </div>
         )}

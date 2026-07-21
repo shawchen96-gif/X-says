@@ -1,30 +1,37 @@
 {
   "primary": {
     "count": 600,
-    "bytes": 168662
+    "examples": 585,
+    "bytes": 269711
   },
   "junior": {
     "count": 1600,
-    "bytes": 414344
+    "examples": 1492,
+    "bytes": 682597
   },
   "senior": {
     "count": 3500,
-    "bytes": 868311
+    "examples": 2672,
+    "bytes": 1435932
   },
   "daily": {
     "count": 1200,
-    "bytes": 328700
+    "examples": 1108,
+    "bytes": 530495
   },
   "cet4": {
     "count": 2607,
-    "bytes": 660739
+    "examples": 1795,
+    "bytes": 1079667
   },
   "cet6": {
     "count": 2078,
-    "bytes": 529849
+    "examples": 1374,
+    "bytes": 862560
   },
   "ielts": {
     "count": 3421,
-    "bytes": 851824
+    "examples": 1811,
+    "bytes": 1378765
   }
 }
