@@ -9,12 +9,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const imageUrl = `${protocol}://${host}/og.png`;
 
   return {
-    title: "WordFlow · 每天学一点",
+    title: "X-says · 把单词说出来",
     description: "用滑动单词卡完成每日词汇任务。",
+    icons: { icon: "/xsays-icon.png", apple: "/xsays-icon.png" },
     openGraph: {
-      title: "WordFlow · 每天学一点",
+      title: "X-says · 把单词说出来",
       description: "选词书、定节奏，用滑动卡片轻松背单词。",
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: "WordFlow 单词卡" }],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: "X-says 单词卡" }],
     },
     twitter: { card: "summary_large_image", images: [imageUrl] },
   };

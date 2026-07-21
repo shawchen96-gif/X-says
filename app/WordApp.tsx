@@ -37,6 +37,46 @@ const words: Word[] = [
 
 type Screen = "library" | "plan" | "study" | "done" | "profile";
 
+type LocalUser = {
+  totalLearned: number;
+  totalKnown: number;
+  reviewCount: number;
+  streak: number;
+  completedDays: number;
+  lastStudyDate: string;
+};
+
+type LocalSession = {
+  date: string;
+  libraryId: string;
+  daily: number;
+  index: number;
+  known: number;
+  review: number;
+};
+
+const emptyUser: LocalUser = {
+  totalLearned: 0,
+  totalKnown: 0,
+  reviewCount: 0,
+  streak: 0,
+  completedDays: 0,
+  lastStudyDate: "",
+};
+
+const dateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const yesterdayKey = () => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return dateKey(date);
+};
+
 export default function WordApp() {
   const [screen, setScreen] = useState<Screen>("library");
   const [library, setLibrary] = useState<Library>(libraries[0]);
@@ -45,16 +85,40 @@ export default function WordApp() {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [review, setReview] = useState(0);
+  const [user, setUser] = useState<LocalUser>(emptyUser);
+  const [hasSavedSession, setHasSavedSession] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
+  const answerLock = useRef(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("wordflow-plan");
-    if (saved) {
-      const parsed = JSON.parse(saved) as { libraryId: string; daily: number };
-      setLibrary(libraries.find((item) => item.id === parsed.libraryId) ?? libraries[0]);
-      setDaily(parsed.daily);
+    try {
+      const savedPlan = window.localStorage.getItem("wordflow-plan");
+      const savedUser = window.localStorage.getItem("wordflow-user-v1");
+      const savedSession = window.localStorage.getItem("wordflow-session-v1");
+
+      if (savedPlan) {
+        const parsed = JSON.parse(savedPlan) as { libraryId: string; daily: number };
+        setLibrary(libraries.find((item) => item.id === parsed.libraryId) ?? libraries[0]);
+        setDaily(parsed.daily);
+      }
+      if (savedUser) setUser({ ...emptyUser, ...(JSON.parse(savedUser) as LocalUser) });
+      if (savedSession) {
+        const session = JSON.parse(savedSession) as LocalSession;
+        if (session.date === dateKey() && session.index < session.daily) {
+          setLibrary(libraries.find((item) => item.id === session.libraryId) ?? libraries[0]);
+          setDaily(session.daily);
+          setIndex(session.index);
+          setKnown(session.known);
+          setReview(session.review);
+          setHasSavedSession(true);
+        } else {
+          window.localStorage.removeItem("wordflow-session-v1");
+        }
+      }
+    } catch {
+      window.localStorage.removeItem("wordflow-session-v1");
     }
   }, []);
 
@@ -62,6 +126,7 @@ export default function WordApp() {
   const current = words[index % words.length];
   const studyNumber = Math.min(index + 1, daily);
   const remainingDays = Math.ceil(library.total / daily);
+  const masteryRate = user.totalLearned ? Math.round((user.totalKnown / user.totalLearned) * 100) : 0;
 
   const selectLibrary = (item: Library) => {
     setLibrary(item);
@@ -70,26 +135,72 @@ export default function WordApp() {
 
   const startStudy = () => {
     window.localStorage.setItem("wordflow-plan", JSON.stringify({ libraryId: library.id, daily }));
-    setIndex(0);
-    setKnown(0);
-    setReview(0);
+    const session = window.localStorage.getItem("wordflow-session-v1");
+    const parsed = session ? JSON.parse(session) as LocalSession : null;
+    const canResume = parsed?.date === dateKey() && parsed.libraryId === library.id && parsed.daily === daily && parsed.index < daily;
+    setIndex(canResume ? parsed.index : 0);
+    setKnown(canResume ? parsed.known : 0);
+    setReview(canResume ? parsed.review : 0);
+    setHasSavedSession(Boolean(canResume));
     setFlipped(false);
     setScreen("study");
   };
 
   const answer = (remembered: boolean) => {
-    if (remembered) setKnown((value) => value + 1);
-    else setReview((value) => value + 1);
-    if (index + 1 >= daily) {
+    if (answerLock.current) return;
+    answerLock.current = true;
+    const nextIndex = index + 1;
+    const nextKnown = known + (remembered ? 1 : 0);
+    const nextReview = review + (remembered ? 0 : 1);
+    const finishing = nextIndex >= daily;
+    setKnown(nextKnown);
+    setReview(nextReview);
+
+    setUser((previous) => {
+      const today = dateKey();
+      const firstStudyToday = previous.lastStudyDate !== today;
+      const nextUser: LocalUser = {
+        totalLearned: previous.totalLearned + 1,
+        totalKnown: previous.totalKnown + (remembered ? 1 : 0),
+        reviewCount: previous.reviewCount + (remembered ? 0 : 1),
+        streak: firstStudyToday ? (previous.lastStudyDate === yesterdayKey() ? previous.streak + 1 : 1) : previous.streak,
+        completedDays: previous.completedDays + (finishing ? 1 : 0),
+        lastStudyDate: today,
+      };
+      window.localStorage.setItem("wordflow-user-v1", JSON.stringify(nextUser));
+      return nextUser;
+    });
+
+    if (finishing) {
+      window.localStorage.removeItem("wordflow-session-v1");
+      setHasSavedSession(false);
       setScreen("done");
+      answerLock.current = false;
     } else {
+      const session: LocalSession = { date: dateKey(), libraryId: library.id, daily, index: nextIndex, known: nextKnown, review: nextReview };
+      window.localStorage.setItem("wordflow-session-v1", JSON.stringify(session));
+      setHasSavedSession(true);
       setDragX(remembered ? 520 : -520);
       window.setTimeout(() => {
-        setIndex((value) => value + 1);
+        setIndex(nextIndex);
         setFlipped(false);
         setDragX(0);
+        answerLock.current = false;
       }, 180);
     }
+  };
+
+  const resetLocalData = () => {
+    if (!window.confirm("确定清空这台设备上的学习记录吗？")) return;
+    ["wordflow-plan", "wordflow-user-v1", "wordflow-session-v1"].forEach((key) => window.localStorage.removeItem(key));
+    setUser(emptyUser);
+    setLibrary(libraries[0]);
+    setDaily(20);
+    setIndex(0);
+    setKnown(0);
+    setReview(0);
+    setHasSavedSession(false);
+    setScreen("library");
   };
 
   const speak = () => {
@@ -122,7 +233,7 @@ export default function WordApp() {
     if (screen === "library") return "选择词书";
     if (screen === "plan") return "制定计划";
     if (screen === "profile") return "学习档案";
-    return "WordFlow";
+    return "X-says";
   }, [screen]);
 
   return (
@@ -130,13 +241,13 @@ export default function WordApp() {
       <div className={`phone-app screen-${screen}`}>
         <header className="app-header">
           <button className="icon-button" aria-label="返回" onClick={() => setScreen(screen === "plan" ? "library" : "library")}>
-            {screen === "library" ? <span className="brand-dot">W</span> : <span aria-hidden="true">‹</span>}
+            {screen === "library" ? <span className="brand-dot" aria-label="X-says">×</span> : <span aria-hidden="true">‹</span>}
           </button>
           <div>
-            <p className="eyebrow">WORD FLOW</p>
+            <p className="eyebrow">X-SAYS · SPEAK IT</p>
             <h1>{title}</h1>
           </div>
-          <button className="streak" aria-label="连续学习 7 天"><span aria-hidden="true">◆</span> 7</button>
+          <button className="streak" aria-label={`连续学习 ${user.streak} 天`} onClick={() => setScreen("profile")}><span aria-hidden="true">◆</span> {user.streak}</button>
         </header>
 
         {screen === "library" && (
@@ -146,6 +257,7 @@ export default function WordApp() {
               <h2>今天想背哪本？</h2>
               <p>选一本适合你当前目标的词书</p>
             </div>
+            <div className="local-save-note"><span>✓</span><p><b>本机用户·已自动保存</b><small>{hasSavedSession ? `今日已学 ${index} 词，点击当前词书继续` : user.totalLearned ? `已累计学习 ${user.totalLearned} 词` : "学习记录只保存在这台设备"}</small></p></div>
             <div className="library-list">
               {libraries.map((item, itemIndex) => (
                 <button className={`library-card ${item.tone}`} key={item.id} onClick={() => selectLibrary(item)}>
@@ -255,10 +367,11 @@ export default function WordApp() {
 
         {screen === "profile" && (
           <section className="content profile-screen">
-            <div className="profile-hero"><span>W</span><h2>学习者</h2><p>已连续学习 7 天</p></div>
-            <div className="profile-grid"><div><b>142</b><small>累计学习</small></div><div><b>86%</b><small>掌握率</small></div></div>
+            <div className="profile-hero"><span>×</span><h2>本机学习者</h2><p>已连续学习 {user.streak} 天</p><small>无需登录 · 数据仅存在当前设备</small></div>
+            <div className="profile-grid"><div><b>{user.totalLearned}</b><small>累计学习</small></div><div><b>{masteryRate}%</b><small>掌握率</small></div><div><b>{user.reviewCount}</b><small>待复习</small></div></div>
             <button className="settings-row" onClick={() => setScreen("plan")}><span>◎</span><b>学习计划</b><small>{daily} 词/天 ›</small></button>
             <button className="settings-row" onClick={() => setScreen("library")}><span>▤</span><b>我的词书</b><small>{library.level} ›</small></button>
+            <button className="settings-row danger-row" onClick={resetLocalData}><span>↺</span><b>清空本机记录</b><small>不可恢复 ›</small></button>
           </section>
         )}
 
@@ -270,14 +383,6 @@ export default function WordApp() {
           </nav>
         )}
       </div>
-      <aside className="desktop-note">
-        <span className="note-logo">W</span>
-        <h2>把零碎时间<br />变成词汇量</h2>
-        <p>选词书 · 定节奏 · 滑卡学习</p>
-        <div className="gesture-demo"><span>←</span><i />
-          <span>→</span></div>
-        <small>支持鼠标拖动、触屏滑动与键盘方向键</small>
-      </aside>
     </main>
   );
 }
