@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 type Library = {
   id: string;
@@ -23,6 +23,44 @@ type Word = {
 };
 
 type CompactWord = { w: string; p: string; t: string; m: string; d: string; e: string; z: string; a: string };
+type DictionaryWord = Word & { books: string[] };
+type DictionaryMode = "auto" | "english" | "chinese";
+
+const WORD_DATA_VERSION = "20260721-examples-v3";
+
+const wordDataUrl = (libraryId: string) => {
+  const url = new URL(`data/${libraryId}.json`, document.baseURI);
+  url.searchParams.set("v", WORD_DATA_VERSION);
+  return url.toString();
+};
+
+const expandCompactWord = (item: CompactWord): Word => ({
+  word: item.w,
+  phonetic: item.p ? `/${item.p.replace(/^\/+|\/+$/g, "")}/` : "",
+  part: item.t || "",
+  meaning: item.m,
+  example: item.e || `We learned the word "${item.w}" in today's lesson.`,
+  translation: item.z || `我们在今天的课上学习了“${item.w}”这个单词。`,
+  definition: item.d,
+  attribution: item.a,
+});
+
+const editDistance = (left: string, right: string) => {
+  if (Math.abs(left.length - right.length) > 2) return 3;
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    const current = [leftIndex];
+    let rowMinimum = current[0];
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const cost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+      current[rightIndex] = Math.min(previous[rightIndex] + 1, current[rightIndex - 1] + 1, previous[rightIndex - 1] + cost);
+      rowMinimum = Math.min(rowMinimum, current[rightIndex]);
+    }
+    if (rowMinimum > 2) return 3;
+    previous = current;
+  }
+  return previous[right.length];
+};
 
 const libraries: Library[] = [
   { id: "primary", title: "小学核心词汇", subtitle: "趣味启蒙 · 课本同步", total: 600, level: "PRIMARY", tone: "sky" },
@@ -138,7 +176,7 @@ const wordBanks: Record<string, Word[]> = {
   ielts: [...examWords, ...coreWords],
 };
 
-type Screen = "library" | "wordlist" | "plan" | "study" | "done" | "profile";
+type Screen = "library" | "wordlist" | "plan" | "study" | "done" | "dictionary" | "profile";
 
 type LocalUser = {
   totalLearned: number;
@@ -208,6 +246,11 @@ export default function WordApp() {
   const [wordQuery, setWordQuery] = useState("");
   const [visibleWords, setVisibleWords] = useState(60);
   const [expandedWord, setExpandedWord] = useState("");
+  const [dictionaryWords, setDictionaryWords] = useState<DictionaryWord[]>([]);
+  const [dictionaryQuery, setDictionaryQuery] = useState("");
+  const [dictionaryMode, setDictionaryMode] = useState<DictionaryMode>("auto");
+  const [dictionaryLoading, setDictionaryLoading] = useState(false);
+  const [dictionaryError, setDictionaryError] = useState("");
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
@@ -253,24 +296,14 @@ export default function WordApp() {
     let cancelled = false;
     setWordLoading(true);
     setWordError("");
-    const dataUrl = new URL(`data/${library.id}.json`, document.baseURI).toString();
-    fetch(dataUrl)
+    fetch(wordDataUrl(library.id), { cache: "reload" })
       .then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json() as Promise<CompactWord[]>;
       })
       .then((items) => {
         if (items.length !== library.total) throw new Error(`词库数量应为 ${library.total}，实际为 ${items.length}`);
-        const words = items.map((item) => ({
-          word: item.w,
-          phonetic: item.p ? `/${item.p.replace(/^\/+|\/+$/g, "")}/` : "",
-          part: item.t || "",
-          meaning: item.m,
-          example: item.e,
-          translation: item.z,
-          definition: item.d,
-          attribution: item.a,
-        }));
+        const words = items.map(expandCompactWord);
         if (!cancelled) setWordCache((currentCache) => ({ ...currentCache, [library.id]: words }));
       })
       .catch(() => {
@@ -282,6 +315,41 @@ export default function WordApp() {
     return () => { cancelled = true; };
   }, [library.id, library.total, wordCache]);
 
+  useEffect(() => {
+    if (screen !== "dictionary" || dictionaryWords.length) return;
+    let cancelled = false;
+    setDictionaryLoading(true);
+    setDictionaryError("");
+    Promise.all(libraries.map(async (item) => {
+      const response = await fetch(wordDataUrl(item.id), { cache: "reload" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const words = await response.json() as CompactWord[];
+      return { library: item, words };
+    }))
+      .then((collections) => {
+        const merged = new Map<string, DictionaryWord>();
+        collections.forEach(({ library: sourceLibrary, words }) => {
+          words.forEach((compactWord) => {
+            const key = compactWord.w.toLowerCase();
+            const existing = merged.get(key);
+            if (existing) {
+              if (!existing.books.includes(sourceLibrary.level)) existing.books.push(sourceLibrary.level);
+            } else {
+              merged.set(key, { ...expandCompactWord(compactWord), books: [sourceLibrary.level] });
+            }
+          });
+        });
+        if (!cancelled) setDictionaryWords(Array.from(merged.values()));
+      })
+      .catch(() => {
+        if (!cancelled) setDictionaryError("词典加载失败，请检查网络后重新进入词典。");
+      })
+      .finally(() => {
+        if (!cancelled) setDictionaryLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [screen, dictionaryWords.length]);
+
   const progress = Math.min(index / Math.max(daily, 1), 1);
   const activeWords = useMemo(() => {
     const words = wordCache[library.id] ?? wordBanks[library.id] ?? examWords;
@@ -292,6 +360,36 @@ export default function WordApp() {
     if (!query) return activeWords;
     return activeWords.filter((item) => item.word.toLowerCase().includes(query) || item.meaning.includes(wordQuery.trim()));
   }, [activeWords, wordQuery]);
+  const deferredDictionaryQuery = useDeferredValue(dictionaryQuery.trim());
+  const detectedDictionaryMode: Exclude<DictionaryMode, "auto"> = /[\u3400-\u9fff]/.test(deferredDictionaryQuery) ? "chinese" : "english";
+  const effectiveDictionaryMode = dictionaryMode === "auto" ? detectedDictionaryMode : dictionaryMode;
+  const dictionaryResults = useMemo(() => {
+    const rawQuery = deferredDictionaryQuery.trim();
+    if (!rawQuery) return [];
+    const query = rawQuery.toLowerCase();
+    return dictionaryWords
+      .map((item) => {
+        if (effectiveDictionaryMode === "chinese") {
+          if (item.meaning.includes(rawQuery) || item.translation.includes(rawQuery)) return { item, score: 0 };
+          if (rawQuery.length > 1) {
+            const characters = Array.from(new Set(Array.from(rawQuery).filter((character) => /[\u3400-\u9fff]/.test(character))));
+            const matched = characters.filter((character) => item.meaning.includes(character)).length;
+            if (characters.length && matched / characters.length >= 0.7) return { item, score: 3 + (characters.length - matched) };
+          }
+          return null;
+        }
+        const word = item.word.toLowerCase();
+        if (word === query) return { item, score: 0 };
+        if (word.startsWith(query)) return { item, score: 1 };
+        if (word.includes(query)) return { item, score: 2 };
+        const distance = editDistance(word, query);
+        return distance <= 2 ? { item, score: 3 + distance } : null;
+      })
+      .filter((result): result is { item: DictionaryWord; score: number } => Boolean(result))
+      .sort((left, right) => left.score - right.score || left.item.word.length - right.item.word.length || left.item.word.localeCompare(right.item.word))
+      .slice(0, 80)
+      .map((result) => result.item);
+  }, [deferredDictionaryQuery, dictionaryWords, effectiveDictionaryMode]);
   const current = activeWords[index] ?? activeWords[0];
   const languagePack = languagePacks.find((pack) => pack.id === languagePackId) ?? languagePacks[0];
   const studyNumber = Math.min(index + 1, daily);
@@ -417,6 +515,7 @@ export default function WordApp() {
     if (screen === "library") return "选择词书";
     if (screen === "wordlist") return "查看词库";
     if (screen === "plan") return "制定计划";
+    if (screen === "dictionary") return "智能词典";
     if (screen === "profile") return "学习档案";
     return "X-says";
   }, [screen]);
@@ -594,6 +693,54 @@ export default function WordApp() {
           </section>
         )}
 
+        {screen === "dictionary" && (
+          <section className="content dictionary-screen">
+            <div className="dictionary-intro">
+              <span className="mini-label">X-SAYS DICTIONARY</span>
+              <h2>中文、英文都能查</h2>
+              <p>输入即查询，自动识别语言，并支持拼写相近的模糊匹配。</p>
+            </div>
+            <label className="dictionary-search">
+              <span aria-hidden="true">⌕</span>
+              <input value={dictionaryQuery} onChange={(event) => setDictionaryQuery(event.target.value)} placeholder="输入单词或中文释义" aria-label="查询词典" autoCapitalize="none" autoCorrect="off" />
+              {dictionaryQuery && <button onClick={() => setDictionaryQuery("")} aria-label="清空查询">×</button>}
+            </label>
+            <div className="dictionary-modes" aria-label="查询方式">
+              <button className={dictionaryMode === "auto" ? "active" : ""} onClick={() => setDictionaryMode("auto")}>自动识别</button>
+              <button className={dictionaryMode === "english" ? "active" : ""} onClick={() => setDictionaryMode("english")}>英文模糊</button>
+              <button className={dictionaryMode === "chinese" ? "active" : ""} onClick={() => setDictionaryMode("chinese")}>中文模糊</button>
+            </div>
+            <div className="dictionary-download-card">
+              <span aria-hidden="true">⇩</span>
+              <div><b>下载最大离线词典</b><small>ECDICT 完整压缩库 · 约 220 万词条 · 51.5 MB</small></div>
+              <a href="https://raw.githubusercontent.com/skywind3000/ECDICT/master/stardict.7z" target="_blank" rel="noreferrer">下载</a>
+            </div>
+            {!dictionaryQuery && <div className="dictionary-quick"><span>快速查询</span>{["学习", "成功", "environment", "resilient"].map((query) => <button key={query} onClick={() => { setDictionaryQuery(query); setDictionaryMode("auto"); }}>{query}</button>)}</div>}
+            {dictionaryLoading ? (
+              <div className="dictionary-state"><span className="loading-dot" />正在加载 15,006 条本地词库</div>
+            ) : dictionaryError ? (
+              <div className="dictionary-state error">{dictionaryError}</div>
+            ) : dictionaryQuery ? (
+              <>
+                <div className="dictionary-result-summary"><b>{dictionaryResults.length}</b> 个匹配结果<span>{dictionaryMode === "auto" ? `已识别为${detectedDictionaryMode === "chinese" ? "中文" : "英文"}` : dictionaryMode === "chinese" ? "中文查询" : "英文查询"}</span></div>
+                <div className="dictionary-results">
+                  {dictionaryResults.map((item) => (
+                    <article key={item.word}>
+                      <header><div><h3>{item.word}</h3><small>{item.phonetic}</small></div><button onClick={() => speakText(item.word)} aria-label={`播放 ${item.word} 发音`}>🔊</button></header>
+                      <p className="dictionary-meaning">{item.part && <b>{item.part}</b>}{item.meaning}</p>
+                      <div className="dictionary-example"><q>{item.example}</q><span>{item.translation}</span><button onClick={() => speakText(item.example)}>🔊 听例句</button></div>
+                      <footer>{item.books.slice(0, 4).map((book) => <span key={book}>{book}</span>)}</footer>
+                    </article>
+                  ))}
+                </div>
+                {!dictionaryResults.length && <div className="dictionary-state">没有完全匹配的结果，试试减少输入内容。</div>}
+              </>
+            ) : (
+              <div className="dictionary-state">本地快速词典加载完成，开始输入即可查询。</div>
+            )}
+          </section>
+        )}
+
         {screen === "profile" && (
           <section className="content profile-screen">
             <div className="profile-hero"><span>×</span><h2>本机学习者</h2><p>已连续学习 {user.streak} 天</p><small>无需登录 · 数据仅存在当前设备</small></div>
@@ -639,6 +786,7 @@ export default function WordApp() {
         {screen !== "study" && screen !== "done" && (
           <nav className="bottom-nav" aria-label="主导航">
             <button className={screen === "library" || screen === "wordlist" || screen === "plan" ? "active" : ""} onClick={() => setScreen("library")}><span>⌂</span><small>学习</small></button>
+            <button onClick={() => setScreen("dictionary")} className={screen === "dictionary" ? "active" : ""}><span>⌕</span><small>词典</small></button>
             <button onClick={() => setScreen("plan")}><span>◷</span><small>复习</small></button>
             <button onClick={() => setScreen("profile")} className={screen === "profile" ? "active" : ""}><span>○</span><small>我的</small></button>
           </nav>
