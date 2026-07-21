@@ -276,16 +276,16 @@ export default function WordApp() {
     setScreen("library");
   };
 
-  const speak = () => {
+  const speakText = (text: string) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(current.word);
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = languagePack.lang;
     utterance.rate = languagePack.rate;
     window.speechSynthesis.speak(utterance);
   };
 
-  const practiceSpeak = () => {
+  const practiceSpeak = (targetText = current.word, targetLabel = "当前单词") => {
     const speechWindow = window as typeof window & {
       SpeechRecognition?: RecognitionConstructor;
       webkitSpeechRecognition?: RecognitionConstructor;
@@ -301,12 +301,16 @@ export default function WordApp() {
     recognition.interimResults = false;
     recognition.onresult = (event) => {
       const heard = event.results[0][0].transcript.trim();
-      const normalize = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "");
-      setSpeechFeedback(normalize(heard) === normalize(current.word) ? "✓ 发音很棒，我听到了正确的单词！" : `我听到了“${heard}”，再试一次吧。`);
+      const tokens = (value: string) => value.toLowerCase().replace(/[^a-z' ]/g, "").split(/\s+/).filter(Boolean);
+      const targetWords = tokens(targetText);
+      const heardWords = tokens(heard);
+      const matched = targetWords.filter((word) => heardWords.includes(word)).length;
+      const passed = targetWords.length === 1 ? heardWords.join("") === targetWords.join("") : matched / targetWords.length >= 0.7;
+      setSpeechFeedback(passed ? `✓ ${targetLabel}朗读很棒，主要单词都听清了！` : `我听到了“${heard}”，再试一次吧。`);
     };
     recognition.onerror = () => setSpeechFeedback("没有听清，请靠近麦克风再试一次。");
     recognition.onend = () => setIsListening(false);
-    setSpeechFeedback("正在聆听…请读出当前单词");
+    setSpeechFeedback(`正在聆听…请读出${targetLabel}`);
     setIsListening(true);
     recognition.start();
   };
@@ -434,7 +438,7 @@ export default function WordApp() {
                   <span className="word-tag">{library.level}</span>
                   <h2>{current.word}</h2>
                   <div className="pronunciation-actions">
-                    <button className="sound-button" onClick={(event) => { event.stopPropagation(); speak(); }} aria-label={`播放${languagePack.name}发音`}><span aria-hidden="true">🔊</span><b>听发音</b></button>
+                    <button className="sound-button" onClick={(event) => { event.stopPropagation(); speakText(current.word); }} aria-label={`播放${languagePack.name}发音`}><span aria-hidden="true">🔊</span><b>听发音</b></button>
                     <button className={`mic-button ${isListening ? "listening" : ""}`} onClick={(event) => { event.stopPropagation(); practiceSpeak(); }} aria-label="开始跟读"><span aria-hidden="true">🎙</span><b>{isListening ? "正在听…" : "开始跟读"}</b></button>
                   </div>
                   <p className="phonetic">{current.phonetic}</p>
@@ -442,7 +446,7 @@ export default function WordApp() {
                   {flipped ? (
                     <div className="definition reveal">
                       <p><b>{current.part}</b> {current.meaning}</p>
-                      <div className="example"><span>EXAMPLE</span><q>{current.example}</q><small>{current.translation}</small></div>
+                      <div className="example"><span>EXAMPLE</span><q>{current.example}</q><small>{current.translation}</small><div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听例句</button><button className={isListening ? "listening" : ""} onClick={(event) => { event.stopPropagation(); practiceSpeak(current.example, "例句"); }}>🎙 {isListening ? "正在听…" : "朗读例句"}</button></div></div>
                     </div>
                   ) : (
                     <div className="tap-hint"><span>↻</span> 点击卡片查看释义</div>
