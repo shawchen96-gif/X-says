@@ -98,24 +98,12 @@ type LocalSession = {
 };
 
 type LanguagePack = { id: string; name: string; note: string; lang: string; rate: number; badge: string };
-type RecognitionResult = { 0: { transcript: string } };
-type RecognitionEvent = { results: { 0: RecognitionResult } };
-type RecognitionInstance = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start: () => void;
-  onresult: ((event: RecognitionEvent) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-};
-type RecognitionConstructor = new () => RecognitionInstance;
 
 const languagePacks: LanguagePack[] = [
-  { id: "us", name: "美式英语", note: "清晰自然，适合日常跟读", lang: "en-US", rate: 0.82, badge: "US" },
+  { id: "us", name: "美式英语", note: "清晰自然，适合日常听音", lang: "en-US", rate: 0.82, badge: "US" },
   { id: "uk", name: "英式英语", note: "标准英音，适合考试听力", lang: "en-GB", rate: 0.8, badge: "UK" },
   { id: "au", name: "澳洲英语", note: "熟悉多元英语口音", lang: "en-AU", rate: 0.82, badge: "AU" },
-  { id: "slow", name: "慢速跟读", note: "放慢语速，适合拆分音节", lang: "en-US", rate: 0.58, badge: "0.7×" },
+  { id: "slow", name: "慢速发音", note: "放慢语速，适合拆分音节", lang: "en-US", rate: 0.58, badge: "0.7×" },
 ];
 
 const emptyUser: LocalUser = {
@@ -152,8 +140,6 @@ export default function WordApp() {
   const [hasSavedSession, setHasSavedSession] = useState(false);
   const [languagePackId, setLanguagePackId] = useState("us");
   const [showLanguagePacks, setShowLanguagePacks] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [speechFeedback, setSpeechFeedback] = useState("");
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
@@ -220,7 +206,6 @@ export default function WordApp() {
   const answer = (remembered: boolean) => {
     if (answerLock.current) return;
     answerLock.current = true;
-    setSpeechFeedback("");
     const nextIndex = index + 1;
     const nextKnown = known + (remembered ? 1 : 0);
     const nextReview = review + (remembered ? 0 : 1);
@@ -285,40 +270,9 @@ export default function WordApp() {
     window.speechSynthesis.speak(utterance);
   };
 
-  const practiceSpeak = (targetText = current.word, targetLabel = "当前单词") => {
-    const speechWindow = window as typeof window & {
-      SpeechRecognition?: RecognitionConstructor;
-      webkitSpeechRecognition?: RecognitionConstructor;
-    };
-    const Recognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
-    if (!Recognition) {
-      setSpeechFeedback("当前浏览器不支持语音识别，建议使用 Chrome 或 Edge。");
-      return;
-    }
-    const recognition = new Recognition();
-    recognition.lang = languagePack.lang;
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onresult = (event) => {
-      const heard = event.results[0][0].transcript.trim();
-      const tokens = (value: string) => value.toLowerCase().replace(/[^a-z' ]/g, "").split(/\s+/).filter(Boolean);
-      const targetWords = tokens(targetText);
-      const heardWords = tokens(heard);
-      const matched = targetWords.filter((word) => heardWords.includes(word)).length;
-      const passed = targetWords.length === 1 ? heardWords.join("") === targetWords.join("") : matched / targetWords.length >= 0.7;
-      setSpeechFeedback(passed ? `✓ ${targetLabel}朗读很棒，主要单词都听清了！` : `我听到了“${heard}”，再试一次吧。`);
-    };
-    recognition.onerror = () => setSpeechFeedback("没有听清，请靠近麦克风再试一次。");
-    recognition.onend = () => setIsListening(false);
-    setSpeechFeedback(`正在聆听…请读出${targetLabel}`);
-    setIsListening(true);
-    recognition.start();
-  };
-
   const chooseLanguagePack = (pack: LanguagePack) => {
     setLanguagePackId(pack.id);
     window.localStorage.setItem("xsays-language-pack", pack.id);
-    setSpeechFeedback("");
     setShowLanguagePacks(false);
   };
 
@@ -439,14 +393,12 @@ export default function WordApp() {
                   <h2>{current.word}</h2>
                   <div className="pronunciation-actions">
                     <button className="sound-button" onClick={(event) => { event.stopPropagation(); speakText(current.word); }} aria-label={`播放${languagePack.name}发音`}><span aria-hidden="true">🔊</span><b>听发音</b></button>
-                    <button className={`mic-button ${isListening ? "listening" : ""}`} onClick={(event) => { event.stopPropagation(); practiceSpeak(); }} aria-label="开始跟读"><span aria-hidden="true">🎙</span><b>{isListening ? "正在听…" : "开始跟读"}</b></button>
                   </div>
                   <p className="phonetic">{current.phonetic}</p>
-                  {speechFeedback && <p className={`speech-feedback ${speechFeedback.startsWith("✓") ? "success" : ""}`}>{speechFeedback}</p>}
                   {flipped ? (
                     <div className="definition reveal">
                       <p><b>{current.part}</b> {current.meaning}</p>
-                      <div className="example"><span>EXAMPLE</span><q>{current.example}</q><small>{current.translation}</small><div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听例句</button><button className={isListening ? "listening" : ""} onClick={(event) => { event.stopPropagation(); practiceSpeak(current.example, "例句"); }}>🎙 {isListening ? "正在听…" : "朗读例句"}</button></div></div>
+                      <div className="example"><span>EXAMPLE</span><q>{current.example}</q><small>{current.translation}</small><div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听例句</button></div></div>
                     </div>
                   ) : (
                     <div className="tap-hint"><span>↻</span> 点击卡片查看释义</div>
@@ -495,7 +447,7 @@ export default function WordApp() {
             <section className="language-sheet" role="dialog" aria-modal="true" aria-label="选择发音语言包" onClick={(event) => event.stopPropagation()}>
               <div className="sheet-handle" />
               <h2>发音语言包</h2>
-              <p>选择标准发音和跟读识别口音</p>
+              <p>选择单词和例句的播放口音</p>
               <div className="language-list">
                 {languagePacks.map((pack) => (
                   <button key={pack.id} className={pack.id === languagePackId ? "selected" : ""} onClick={() => chooseLanguagePack(pack)}>
