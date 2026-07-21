@@ -1,0 +1,30 @@
+{
+  "primary": {
+    "count": 600,
+    "bytes": 168662
+  },
+  "junior": {
+    "count": 1600,
+    "bytes": 414344
+  },
+  "senior": {
+    "count": 3500,
+    "bytes": 868311
+  },
+  "daily": {
+    "count": 1200,
+    "bytes": 328700
+  },
+  "cet4": {
+    "count": 2607,
+    "bytes": 660739
+  },
+  "cet6": {
+    "count": 2078,
+    "bytes": 529849
+  },
+  "ielts": {
+    "count": 3421,
+    "bytes": 851824
+  }
+}

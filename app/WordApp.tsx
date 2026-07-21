@@ -20,6 +20,8 @@ type Word = {
   translation: string;
 };
 
+type CompactWord = { w: string; p: string; t: string; m: string; d: string };
+
 const libraries: Library[] = [
   { id: "primary", title: "小学核心词汇", subtitle: "趣味启蒙 · 课本同步", total: 600, level: "PRIMARY", tone: "sky" },
   { id: "junior", title: "初中必备词汇", subtitle: "中考基础 · 核心词组", total: 1600, level: "JUNIOR", tone: "violet" },
@@ -134,7 +136,7 @@ const wordBanks: Record<string, Word[]> = {
   ielts: [...examWords, ...coreWords],
 };
 
-type Screen = "library" | "plan" | "study" | "done" | "profile";
+type Screen = "library" | "wordlist" | "plan" | "study" | "done" | "profile";
 
 type LocalUser = {
   totalLearned: number;
@@ -197,6 +199,11 @@ export default function WordApp() {
   const [hasSavedSession, setHasSavedSession] = useState(false);
   const [languagePackId, setLanguagePackId] = useState("us");
   const [showLanguagePacks, setShowLanguagePacks] = useState(false);
+  const [wordCache, setWordCache] = useState<Record<string, Word[]>>({});
+  const [wordLoading, setWordLoading] = useState(true);
+  const [wordError, setWordError] = useState("");
+  const [wordQuery, setWordQuery] = useState("");
+  const [visibleWords, setVisibleWords] = useState(60);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
@@ -234,11 +241,51 @@ export default function WordApp() {
     }
   }, []);
 
+  useEffect(() => {
+    if (wordCache[library.id]) {
+      setWordLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setWordLoading(true);
+    setWordError("");
+    const dataUrl = new URL(`data/${library.id}.json`, document.baseURI).toString();
+    fetch(dataUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json() as Promise<CompactWord[]>;
+      })
+      .then((items) => {
+        if (items.length !== library.total) throw new Error(`词库数量应为 ${library.total}，实际为 ${items.length}`);
+        const words = items.map((item) => ({
+          word: item.w,
+          phonetic: item.p ? `/${item.p.replace(/^\/+|\/+$/g, "")}/` : "",
+          part: item.t || "",
+          meaning: item.m,
+          example: item.d,
+          translation: item.m,
+        }));
+        if (!cancelled) setWordCache((currentCache) => ({ ...currentCache, [library.id]: words }));
+      })
+      .catch(() => {
+        if (!cancelled) setWordError("词库加载失败，请检查网络后重试。");
+      })
+      .finally(() => {
+        if (!cancelled) setWordLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [library.id, library.total, wordCache]);
+
   const progress = Math.min(index / Math.max(daily, 1), 1);
   const activeWords = useMemo(() => {
-    const words = wordBanks[library.id] ?? examWords;
+    const words = wordCache[library.id] ?? wordBanks[library.id] ?? examWords;
     return Array.from(new Map(words.map((item) => [item.word.toLowerCase(), item])).values());
-  }, [library.id]);
+  }, [library.id, wordCache]);
+  const filteredWords = useMemo(() => {
+    const query = wordQuery.trim().toLowerCase();
+    if (!query) return activeWords;
+    return activeWords.filter((item) => item.word.toLowerCase().includes(query) || item.meaning.includes(wordQuery.trim()));
+  }, [activeWords, wordQuery]);
   const current = activeWords[index] ?? activeWords[0];
   const languagePack = languagePacks.find((pack) => pack.id === languagePackId) ?? languagePacks[0];
   const studyNumber = Math.min(index + 1, daily);
@@ -247,10 +294,14 @@ export default function WordApp() {
 
   const selectLibrary = (item: Library) => {
     setLibrary(item);
-    setScreen("plan");
+    setWordQuery("");
+    setVisibleWords(60);
+    setWordLoading(!wordCache[item.id]);
+    setScreen("wordlist");
   };
 
   const startStudy = () => {
+    if (wordLoading || wordError || activeWords.length < daily) return;
     window.localStorage.setItem("wordflow-plan", JSON.stringify({ libraryId: library.id, daily }));
     const session = window.localStorage.getItem("wordflow-session-v1");
     const parsed = session ? JSON.parse(session) as LocalSession : null;
@@ -355,16 +406,22 @@ export default function WordApp() {
 
   const title = useMemo(() => {
     if (screen === "library") return "选择词书";
+    if (screen === "wordlist") return "查看词库";
     if (screen === "plan") return "制定计划";
     if (screen === "profile") return "学习档案";
     return "X-says";
   }, [screen]);
 
+  const goBack = () => {
+    if (screen === "plan") setScreen("wordlist");
+    else setScreen("library");
+  };
+
   return (
     <main className="page-shell">
       <div className={`phone-app screen-${screen}`}>
         <header className="app-header">
-          <button className="icon-button" aria-label="返回" onClick={() => setScreen(screen === "plan" ? "library" : "library")}>
+          <button className="icon-button" aria-label="返回" onClick={goBack}>
             {screen === "library" ? <span className="brand-dot" aria-label="X-says">×</span> : <span aria-hidden="true">‹</span>}
           </button>
           <div>
@@ -399,6 +456,38 @@ export default function WordApp() {
           </section>
         )}
 
+        {screen === "wordlist" && (
+          <section className="content wordlist-screen">
+            <div className={`wordlist-hero ${library.tone}`}>
+              <span className="book-cover" aria-hidden="true"><b>{library.level}</b><i>{String(libraries.findIndex((item) => item.id === library.id) + 1).padStart(2, "0")}</i></span>
+              <div><span className="mini-label">完整词库</span><h2>{library.title}</h2><p>{wordLoading ? "正在读取词条…" : `${activeWords.length.toLocaleString()} 个真实词条`}</p></div>
+            </div>
+            <label className="word-search"><span aria-hidden="true">⌕</span><input value={wordQuery} onChange={(event) => { setWordQuery(event.target.value); setVisibleWords(60); }} placeholder="搜索英文或中文释义" aria-label="搜索词库" /></label>
+            {wordLoading ? (
+              <div className="wordlist-state"><span className="loading-dot" />正在加载完整词库</div>
+            ) : wordError ? (
+              <div className="wordlist-state error">{wordError}<button onClick={() => { setWordError(""); setWordCache((cache) => ({ ...cache })); }}>重新加载</button></div>
+            ) : (
+              <>
+                <div className="wordlist-summary"><b>{filteredWords.length.toLocaleString()}</b> 个结果 <span>每次显示最多 60 个，继续下拉可加载更多</span></div>
+                <ol className="word-rows">
+                  {filteredWords.slice(0, visibleWords).map((item, itemIndex) => (
+                    <li key={item.word}>
+                      <span className="word-order">{String(itemIndex + 1).padStart(3, "0")}</span>
+                      <span className="word-row-copy"><b>{item.word}</b><small>{item.phonetic}</small><p>{item.part && <em>{item.part}</em>}{item.meaning}</p></span>
+                      <button onClick={() => speakText(item.word)} aria-label={`播放 ${item.word} 发音`}>🔊</button>
+                    </li>
+                  ))}
+                </ol>
+                {visibleWords < filteredWords.length && <button className="load-more" onClick={() => setVisibleWords((count) => count + 60)}>再显示 60 个</button>}
+                {!filteredWords.length && <div className="wordlist-state">没有找到相关单词</div>}
+                <p className="dictionary-source">释义与音标基于 ECDICT 开放词典（MIT License）整理</p>
+                <button className="primary-button wordlist-use" onClick={() => setScreen("plan")}>使用这本词书 <span>→</span></button>
+              </>
+            )}
+          </section>
+        )}
+
         {screen === "plan" && (
           <section className="content plan-screen">
             <div className="step-track"><span style={{ width: "100%" }} /></div>
@@ -408,7 +497,7 @@ export default function WordApp() {
             <div className="selected-book">
               <span className={`tiny-cover ${library.tone}`}>{library.level}</span>
               <span><small>当前词书</small><b>{library.title}</b></span>
-              <button onClick={() => setScreen("library")}>更换</button>
+              <button onClick={() => setScreen("wordlist")}>查看词库</button>
             </div>
             <div className="number-panel">
               <span className="panel-title">每日学习量</span>
@@ -420,7 +509,7 @@ export default function WordApp() {
               <div><span>◷</span><p><b>约 {Math.max(5, Math.round(daily * 0.55))} 分钟</b><small>每日预计时长</small></p></div>
               <div><span>◎</span><p><b>{remainingDays} 天</b><small>预计完成词书</small></p></div>
             </div>
-            <button className="primary-button" onClick={startStudy}>开始今日学习 <span>→</span></button>
+            <button className="primary-button" disabled={wordLoading || Boolean(wordError)} onClick={startStudy}>{wordLoading ? "正在加载词库…" : "开始今日学习"} <span>→</span></button>
             <p className="tip-line">◆ 你可以随时在「我的」中调整计划</p>
           </section>
         )}
@@ -458,7 +547,7 @@ export default function WordApp() {
                   {flipped ? (
                     <div className="definition reveal">
                       <p><b>{current.part}</b> {current.meaning}</p>
-                      <div className="example"><span>EXAMPLE</span><q>{current.example}</q><small>{current.translation}</small><div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听例句</button></div></div>
+                      <div className="example"><span>ENGLISH DEFINITION</span><q>{current.example}</q><small>{current.translation}</small><div className="example-actions"><button onClick={(event) => { event.stopPropagation(); speakText(current.example); }}>🔊 听英文释义</button></div></div>
                     </div>
                   ) : (
                     <div className="tap-hint"><span>↻</span> 点击卡片查看释义</div>
@@ -522,7 +611,7 @@ export default function WordApp() {
 
         {screen !== "study" && screen !== "done" && (
           <nav className="bottom-nav" aria-label="主导航">
-            <button className={screen === "library" || screen === "plan" ? "active" : ""} onClick={() => setScreen("library")}><span>⌂</span><small>学习</small></button>
+            <button className={screen === "library" || screen === "wordlist" || screen === "plan" ? "active" : ""} onClick={() => setScreen("library")}><span>⌂</span><small>学习</small></button>
             <button onClick={() => setScreen("plan")}><span>◷</span><small>复习</small></button>
             <button onClick={() => setScreen("profile")} className={screen === "profile" ? "active" : ""}><span>○</span><small>我的</small></button>
           </nav>
