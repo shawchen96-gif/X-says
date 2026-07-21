@@ -58,26 +58,30 @@ body {
 
 .profile-hero>span{font-size:34px;border-radius:24px 24px 24px 10px}.profile-hero>small{display:block;margin-top:9px;color:#909a94;font-size:9px}.profile-grid{grid-template-columns:repeat(3,1fr);gap:8px}.profile-grid div{padding:15px 5px}.profile-grid b{font-size:23px}.profile-grid small{font-size:8px}.danger-row{margin-top:12px;color:#ad5b55}.danger-row>span{color:#ad5b55}
 
-/* Keep study actions inside every mobile viewport, including short screens. */
-.study-screen{height:100dvh;min-height:0;display:grid;grid-template-rows:45px minmax(0,1fr) auto auto;gap:9px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
-.card-stage{height:auto;min-height:0;padding:4px 3px}
+/* Pin the study controls to the visible safe area instead of card flow. */
+.study-screen{position:relative;height:100svh;min-height:0;display:block;overflow:hidden;padding:14px 18px max(10px,env(safe-area-inset-bottom))}
+.study-topline{height:42px}
+.card-stage{position:absolute;top:62px;right:18px;bottom:154px;left:18px;height:auto;min-height:0;padding:4px 3px}
 .word-card{height:calc(100% - 6px);min-height:0}
-.swipe-instruction{min-height:16px}
-.answer-actions{margin-top:0;padding-bottom:0}
+.swipe-instruction{position:absolute;right:18px;bottom:82px;left:18px;min-height:16px}
+.answer-actions{position:absolute;right:18px;bottom:max(10px,env(safe-area-inset-bottom));left:18px;z-index:20;margin:0;padding:0;background:#f9faf6}
 
 @media (max-width: 900px) {
   .page-shell { display: block; }
   .phone-app { max-width: none; min-height: 0; }
 }
 @media (max-height: 700px) {
-  .study-screen{grid-template-rows:38px minmax(0,1fr) auto auto;gap:4px;padding-top:10px;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .study-screen{padding-top:8px}
   .study-topline{height:38px}
+  .card-stage{top:48px;bottom:140px}
+  .swipe-instruction{bottom:72px}
   .word-main{padding:34px 22px 17px}
   .word-main h2{font-size:32px;margin:15px 0 6px}
   .definition{margin-top:9px}
   .definition>p{margin:4px 0;line-height:1.55}
   .example{margin-top:8px;padding:11px;gap:4px}
-  .answer-actions button{height:52px}
+  .answer-actions{bottom:max(7px,env(safe-area-inset-bottom))}
+  .answer-actions button{height:50px}
   .content{padding-bottom:16px}
   .library-card{min-height:105px}
   .book-cover{height:80px}
