@@ -45,3 +45,4 @@ next-env.d.ts
 .dev-*.log
 .dev-pid
 X-says-GitHub-Pages.zip
+/X-says-GitHub-Pages/

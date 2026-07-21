@@ -21,12 +21,16 @@ type Word = {
 };
 
 const libraries: Library[] = [
+  { id: "primary", title: "小学核心词汇", subtitle: "趣味启蒙 · 课本同步", total: 600, level: "PRIMARY", tone: "sky" },
+  { id: "junior", title: "初中必备词汇", subtitle: "中考基础 · 核心词组", total: 1600, level: "JUNIOR", tone: "violet" },
+  { id: "senior", title: "高中高频词汇", subtitle: "高考必备 · 阅读高频", total: 3500, level: "SENIOR", tone: "coral" },
+  { id: "daily", title: "日常口语词汇", subtitle: "生活场景 · 开口就说", total: 1200, level: "DAILY", tone: "lemon" },
   { id: "cet4", title: "大学英语四级", subtitle: "打牢基础 · 高频必备", total: 2607, level: "CET-4", tone: "mint" },
   { id: "cet6", title: "大学英语六级", subtitle: "进阶提升 · 真题高频", total: 2078, level: "CET-6", tone: "blue" },
   { id: "ielts", title: "雅思核心词汇", subtitle: "留学备考 · 场景分类", total: 3421, level: "IELTS", tone: "orange" },
 ];
 
-const words: Word[] = [
+const examWords: Word[] = [
   { word: "serendipity", phonetic: "/ˌserənˈdɪpəti/", part: "n.", meaning: "意外发现美好事物的机缘", example: "We met by pure serendipity.", translation: "我们的相遇纯属美好的偶然。" },
   { word: "resilient", phonetic: "/rɪˈzɪliənt/", part: "adj.", meaning: "有韧性的；能快速恢复的", example: "Children can be remarkably resilient.", translation: "孩子们可以表现得极具韧性。" },
   { word: "elaborate", phonetic: "/ɪˈlæbərət/", part: "adj.", meaning: "精心制作的；详尽的", example: "She made an elaborate plan.", translation: "她制定了一份周密的计划。" },
@@ -34,6 +38,44 @@ const words: Word[] = [
   { word: "inevitable", phonetic: "/ɪnˈevɪtəbəl/", part: "adj.", meaning: "不可避免的；必然的", example: "Change is inevitable.", translation: "变化是不可避免的。" },
   { word: "perspective", phonetic: "/pəˈspektɪv/", part: "n.", meaning: "观点；思考问题的角度", example: "Try to see it from my perspective.", translation: "试着从我的角度看它。" },
 ];
+
+const wordBanks: Record<string, Word[]> = {
+  primary: [
+    { word: "family", phonetic: "/ˈfæməli/", part: "n.", meaning: "家庭；家人", example: "I love my family.", translation: "我爱我的家人。" },
+    { word: "happy", phonetic: "/ˈhæpi/", part: "adj.", meaning: "快乐的；高兴的", example: "We are happy today.", translation: "我们今天很开心。" },
+    { word: "school", phonetic: "/skuːl/", part: "n.", meaning: "学校", example: "I walk to school.", translation: "我步行去学校。" },
+    { word: "friend", phonetic: "/frend/", part: "n.", meaning: "朋友", example: "Amy is my best friend.", translation: "艾米是我最好的朋友。" },
+    { word: "beautiful", phonetic: "/ˈbjuːtɪfəl/", part: "adj.", meaning: "美丽的", example: "What a beautiful flower!", translation: "多美的一朵花啊！" },
+    { word: "breakfast", phonetic: "/ˈbrekfəst/", part: "n.", meaning: "早餐", example: "Breakfast is ready.", translation: "早餐准备好了。" },
+  ],
+  junior: [
+    { word: "advice", phonetic: "/ədˈvaɪs/", part: "n.", meaning: "建议；忠告", example: "Thank you for your advice.", translation: "谢谢你的建议。" },
+    { word: "improve", phonetic: "/ɪmˈpruːv/", part: "v.", meaning: "改善；提高", example: "Reading can improve your English.", translation: "阅读能提高你的英语。" },
+    { word: "environment", phonetic: "/ɪnˈvaɪrənmənt/", part: "n.", meaning: "环境", example: "We should protect the environment.", translation: "我们应该保护环境。" },
+    { word: "possible", phonetic: "/ˈpɒsəbəl/", part: "adj.", meaning: "可能的", example: "Anything is possible.", translation: "一切皆有可能。" },
+    { word: "decision", phonetic: "/dɪˈsɪʒən/", part: "n.", meaning: "决定；选择", example: "It was a difficult decision.", translation: "这是一个艰难的决定。" },
+    { word: "knowledge", phonetic: "/ˈnɒlɪdʒ/", part: "n.", meaning: "知识；学问", example: "Knowledge gives us power.", translation: "知识给予我们力量。" },
+  ],
+  senior: [
+    { word: "significant", phonetic: "/sɪɡˈnɪfɪkənt/", part: "adj.", meaning: "重要的；显著的", example: "The project made significant progress.", translation: "这个项目取得了显著进展。" },
+    { word: "contribute", phonetic: "/kənˈtrɪbjuːt/", part: "v.", meaning: "贡献；促成", example: "Everyone can contribute to the team.", translation: "每个人都能为团队做贡献。" },
+    { word: "opportunity", phonetic: "/ˌɒpəˈtjuːnəti/", part: "n.", meaning: "机会；时机", example: "This is a valuable opportunity.", translation: "这是一个宝贵的机会。" },
+    { word: "essential", phonetic: "/ɪˈsenʃəl/", part: "adj.", meaning: "必不可少的", example: "Water is essential for life.", translation: "水对生命至关重要。" },
+    { word: "challenge", phonetic: "/ˈtʃælɪndʒ/", part: "n.", meaning: "挑战；难题", example: "She is ready for the challenge.", translation: "她已准备好迎接挑战。" },
+    { word: "independent", phonetic: "/ˌɪndɪˈpendənt/", part: "adj.", meaning: "独立的；自主的", example: "He became an independent learner.", translation: "他成为了一名自主学习者。" },
+  ],
+  daily: [
+    { word: "actually", phonetic: "/ˈæktʃuəli/", part: "adv.", meaning: "其实；实际上", example: "Actually, I agree with you.", translation: "其实，我同意你的看法。" },
+    { word: "probably", phonetic: "/ˈprɒbəbli/", part: "adv.", meaning: "大概；很可能", example: "I will probably be there at six.", translation: "我大概六点到。" },
+    { word: "available", phonetic: "/əˈveɪləbəl/", part: "adj.", meaning: "有空的；可获得的", example: "Are you available this afternoon?", translation: "你今天下午有空吗？" },
+    { word: "recommend", phonetic: "/ˌrekəˈmend/", part: "v.", meaning: "推荐；建议", example: "What do you recommend?", translation: "你有什么推荐？" },
+    { word: "convenient", phonetic: "/kənˈviːniənt/", part: "adj.", meaning: "方便的", example: "Is this time convenient for you?", translation: "这个时间你方便吗？" },
+    { word: "appreciate", phonetic: "/əˈpriːʃieɪt/", part: "v.", meaning: "感激；欣赏", example: "I really appreciate your help.", translation: "我真的很感谢你的帮助。" },
+  ],
+  cet4: examWords,
+  cet6: examWords,
+  ielts: examWords,
+};
 
 type Screen = "library" | "plan" | "study" | "done" | "profile";
 
@@ -123,7 +165,8 @@ export default function WordApp() {
   }, []);
 
   const progress = Math.min(index / Math.max(daily, 1), 1);
-  const current = words[index % words.length];
+  const activeWords = wordBanks[library.id] ?? examWords;
+  const current = activeWords[index % activeWords.length];
   const studyNumber = Math.min(index + 1, daily);
   const remainingDays = Math.ceil(library.total / daily);
   const masteryRate = user.totalLearned ? Math.round((user.totalKnown / user.totalLearned) * 100) : 0;
