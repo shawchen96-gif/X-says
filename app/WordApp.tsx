@@ -39,6 +39,59 @@ const examWords: Word[] = [
   { word: "perspective", phonetic: "/pəˈspektɪv/", part: "n.", meaning: "观点；思考问题的角度", example: "Try to see it from my perspective.", translation: "试着从我的角度看它。" },
 ];
 
+const coreWords: Word[] = [
+  { word: "water", phonetic: "/ˈwɔːtər/", part: "n.", meaning: "水", example: "Please drink more water.", translation: "请多喝水。" },
+  { word: "book", phonetic: "/bʊk/", part: "n.", meaning: "书；书籍", example: "This book is easy to read.", translation: "这本书很容易读。" },
+  { word: "teacher", phonetic: "/ˈtiːtʃər/", part: "n.", meaning: "老师；教师", example: "Our teacher explains it clearly.", translation: "我们的老师讲解得很清楚。" },
+  { word: "student", phonetic: "/ˈstuːdənt/", part: "n.", meaning: "学生", example: "Every student has a notebook.", translation: "每个学生都有一本笔记本。" },
+  { word: "morning", phonetic: "/ˈmɔːrnɪŋ/", part: "n.", meaning: "早晨；上午", example: "I study English every morning.", translation: "我每天早晨学习英语。" },
+  { word: "evening", phonetic: "/ˈiːvnɪŋ/", part: "n.", meaning: "傍晚；晚上", example: "We take a walk in the evening.", translation: "我们晚上散步。" },
+  { word: "window", phonetic: "/ˈwɪndoʊ/", part: "n.", meaning: "窗户", example: "Please open the window.", translation: "请打开窗户。" },
+  { word: "garden", phonetic: "/ˈɡɑːrdn/", part: "n.", meaning: "花园；园地", example: "Flowers grow in the garden.", translation: "花朵生长在花园里。" },
+  { word: "animal", phonetic: "/ˈænɪməl/", part: "n.", meaning: "动物", example: "The panda is a lovely animal.", translation: "熊猫是一种可爱的动物。" },
+  { word: "color", phonetic: "/ˈkʌlər/", part: "n.", meaning: "颜色", example: "Blue is my favorite color.", translation: "蓝色是我最喜欢的颜色。" },
+  { word: "music", phonetic: "/ˈmjuːzɪk/", part: "n.", meaning: "音乐", example: "She listens to music after class.", translation: "她下课后听音乐。" },
+  { word: "story", phonetic: "/ˈstɔːri/", part: "n.", meaning: "故事", example: "He told us an interesting story.", translation: "他给我们讲了一个有趣的故事。" },
+  { word: "question", phonetic: "/ˈkwestʃən/", part: "n.", meaning: "问题；疑问", example: "May I ask a question?", translation: "我可以问一个问题吗？" },
+  { word: "answer", phonetic: "/ˈænsər/", part: "n.; v.", meaning: "答案；回答", example: "Please answer the question.", translation: "请回答这个问题。" },
+  { word: "listen", phonetic: "/ˈlɪsən/", part: "v.", meaning: "听；倾听", example: "Listen carefully to the speaker.", translation: "认真听发言者讲话。" },
+  { word: "speak", phonetic: "/spiːk/", part: "v.", meaning: "说话；讲话", example: "Could you speak more slowly?", translation: "你能说慢一点吗？" },
+  { word: "write", phonetic: "/raɪt/", part: "v.", meaning: "写；书写", example: "Write your name here.", translation: "在这里写下你的名字。" },
+  { word: "read", phonetic: "/riːd/", part: "v.", meaning: "阅读；朗读", example: "I read for twenty minutes a day.", translation: "我每天阅读二十分钟。" },
+  { word: "learn", phonetic: "/lɜːrn/", part: "v.", meaning: "学习；学会", example: "We learn something new every day.", translation: "我们每天学习新东西。" },
+  { word: "remember", phonetic: "/rɪˈmembər/", part: "v.", meaning: "记得；记住", example: "Remember to review these words.", translation: "记得复习这些单词。" },
+  { word: "begin", phonetic: "/bɪˈɡɪn/", part: "v.", meaning: "开始", example: "The lesson will begin at nine.", translation: "课程将在九点开始。" },
+  { word: "finish", phonetic: "/ˈfɪnɪʃ/", part: "v.", meaning: "完成；结束", example: "I finished my homework early.", translation: "我很早就完成了作业。" },
+  { word: "help", phonetic: "/help/", part: "v.; n.", meaning: "帮助；援助", example: "Can you help me with this task?", translation: "你能帮我完成这项任务吗？" },
+  { word: "choose", phonetic: "/tʃuːz/", part: "v.", meaning: "选择；挑选", example: "Choose the best answer.", translation: "选择最佳答案。" },
+  { word: "travel", phonetic: "/ˈtrævəl/", part: "v.; n.", meaning: "旅行；游历", example: "They love to travel by train.", translation: "他们喜欢乘火车旅行。" },
+  { word: "health", phonetic: "/helθ/", part: "n.", meaning: "健康", example: "Sleep is important for your health.", translation: "睡眠对你的健康很重要。" },
+  { word: "market", phonetic: "/ˈmɑːrkɪt/", part: "n.", meaning: "市场；集市", example: "We bought fruit at the market.", translation: "我们在市场买了水果。" },
+  { word: "office", phonetic: "/ˈɔːfɪs/", part: "n.", meaning: "办公室；办事处", example: "She works in a small office.", translation: "她在一间小办公室工作。" },
+  { word: "meeting", phonetic: "/ˈmiːtɪŋ/", part: "n.", meaning: "会议；会面", example: "The meeting starts at two.", translation: "会议两点开始。" },
+  { word: "message", phonetic: "/ˈmesɪdʒ/", part: "n.", meaning: "消息；信息", example: "I left you a message.", translation: "我给你留了一条消息。" },
+  { word: "weather", phonetic: "/ˈweðər/", part: "n.", meaning: "天气", example: "The weather is warm today.", translation: "今天天气暖和。" },
+  { word: "future", phonetic: "/ˈfjuːtʃər/", part: "n.; adj.", meaning: "未来；将来的", example: "We are planning for the future.", translation: "我们正在规划未来。" },
+  { word: "culture", phonetic: "/ˈkʌltʃər/", part: "n.", meaning: "文化", example: "Food is an important part of culture.", translation: "饮食是文化的重要组成部分。" },
+  { word: "language", phonetic: "/ˈlæŋɡwɪdʒ/", part: "n.", meaning: "语言", example: "English is an international language.", translation: "英语是一门国际语言。" },
+  { word: "important", phonetic: "/ɪmˈpɔːrtənt/", part: "adj.", meaning: "重要的", example: "Practice is important for progress.", translation: "练习对进步很重要。" },
+  { word: "careful", phonetic: "/ˈkerfəl/", part: "adj.", meaning: "小心的；仔细的", example: "Be careful when you cross the road.", translation: "过马路时要小心。" },
+  { word: "friendly", phonetic: "/ˈfrendli/", part: "adj.", meaning: "友好的；亲切的", example: "The staff are helpful and friendly.", translation: "工作人员乐于助人而且很友好。" },
+  { word: "different", phonetic: "/ˈdɪfrənt/", part: "adj.", meaning: "不同的；有差异的", example: "The two pictures look different.", translation: "这两幅图片看起来不同。" },
+  { word: "useful", phonetic: "/ˈjuːsfəl/", part: "adj.", meaning: "有用的；实用的", example: "This dictionary is very useful.", translation: "这本词典非常实用。" },
+  { word: "ready", phonetic: "/ˈredi/", part: "adj.", meaning: "准备好的", example: "Are you ready to begin?", translation: "你准备好开始了吗？" },
+  { word: "quickly", phonetic: "/ˈkwɪkli/", part: "adv.", meaning: "迅速地；很快地", example: "She quickly found the answer.", translation: "她很快找到了答案。" },
+  { word: "always", phonetic: "/ˈɔːlweɪz/", part: "adv.", meaning: "总是；一直", example: "He always arrives on time.", translation: "他总是准时到达。" },
+  { word: "sometimes", phonetic: "/ˈsʌmtaɪmz/", part: "adv.", meaning: "有时；偶尔", example: "We sometimes study together.", translation: "我们有时一起学习。" },
+  { word: "together", phonetic: "/təˈɡeðər/", part: "adv.", meaning: "一起；共同", example: "Let us solve the problem together.", translation: "让我们一起解决这个问题。" },
+  { word: "because", phonetic: "/bɪˈkɔːz/", part: "conj.", meaning: "因为；由于", example: "I stayed home because it rained.", translation: "因为下雨，我待在家里。" },
+  { word: "enough", phonetic: "/ɪˈnʌf/", part: "adj.; adv.", meaning: "足够的；充分地", example: "We have enough time to finish.", translation: "我们有足够的时间完成。" },
+  { word: "arrive", phonetic: "/əˈraɪv/", part: "v.", meaning: "到达；抵达", example: "The train will arrive soon.", translation: "火车很快就会到达。" },
+  { word: "explain", phonetic: "/ɪkˈspleɪn/", part: "v.", meaning: "解释；说明", example: "Can you explain this rule again?", translation: "你能再解释一下这条规则吗？" },
+  { word: "practice", phonetic: "/ˈpræktɪs/", part: "n.; v.", meaning: "练习；训练", example: "Daily practice builds confidence.", translation: "每日练习能建立信心。" },
+  { word: "success", phonetic: "/səkˈses/", part: "n.", meaning: "成功；成就", example: "Hard work can lead to success.", translation: "努力可以带来成功。" },
+];
+
 const wordBanks: Record<string, Word[]> = {
   primary: [
     { word: "family", phonetic: "/ˈfæməli/", part: "n.", meaning: "家庭；家人", example: "I love my family.", translation: "我爱我的家人。" },
@@ -47,6 +100,7 @@ const wordBanks: Record<string, Word[]> = {
     { word: "friend", phonetic: "/frend/", part: "n.", meaning: "朋友", example: "Amy is my best friend.", translation: "艾米是我最好的朋友。" },
     { word: "beautiful", phonetic: "/ˈbjuːtɪfəl/", part: "adj.", meaning: "美丽的", example: "What a beautiful flower!", translation: "多美的一朵花啊！" },
     { word: "breakfast", phonetic: "/ˈbrekfəst/", part: "n.", meaning: "早餐", example: "Breakfast is ready.", translation: "早餐准备好了。" },
+    ...coreWords,
   ],
   junior: [
     { word: "advice", phonetic: "/ədˈvaɪs/", part: "n.", meaning: "建议；忠告", example: "Thank you for your advice.", translation: "谢谢你的建议。" },
@@ -55,6 +109,7 @@ const wordBanks: Record<string, Word[]> = {
     { word: "possible", phonetic: "/ˈpɒsəbəl/", part: "adj.", meaning: "可能的", example: "Anything is possible.", translation: "一切皆有可能。" },
     { word: "decision", phonetic: "/dɪˈsɪʒən/", part: "n.", meaning: "决定；选择", example: "It was a difficult decision.", translation: "这是一个艰难的决定。" },
     { word: "knowledge", phonetic: "/ˈnɒlɪdʒ/", part: "n.", meaning: "知识；学问", example: "Knowledge gives us power.", translation: "知识给予我们力量。" },
+    ...coreWords,
   ],
   senior: [
     { word: "significant", phonetic: "/sɪɡˈnɪfɪkənt/", part: "adj.", meaning: "重要的；显著的", example: "The project made significant progress.", translation: "这个项目取得了显著进展。" },
@@ -63,6 +118,7 @@ const wordBanks: Record<string, Word[]> = {
     { word: "essential", phonetic: "/ɪˈsenʃəl/", part: "adj.", meaning: "必不可少的", example: "Water is essential for life.", translation: "水对生命至关重要。" },
     { word: "challenge", phonetic: "/ˈtʃælɪndʒ/", part: "n.", meaning: "挑战；难题", example: "She is ready for the challenge.", translation: "她已准备好迎接挑战。" },
     { word: "independent", phonetic: "/ˌɪndɪˈpendənt/", part: "adj.", meaning: "独立的；自主的", example: "He became an independent learner.", translation: "他成为了一名自主学习者。" },
+    ...coreWords,
   ],
   daily: [
     { word: "actually", phonetic: "/ˈæktʃuəli/", part: "adv.", meaning: "其实；实际上", example: "Actually, I agree with you.", translation: "其实，我同意你的看法。" },
@@ -71,10 +127,11 @@ const wordBanks: Record<string, Word[]> = {
     { word: "recommend", phonetic: "/ˌrekəˈmend/", part: "v.", meaning: "推荐；建议", example: "What do you recommend?", translation: "你有什么推荐？" },
     { word: "convenient", phonetic: "/kənˈviːniənt/", part: "adj.", meaning: "方便的", example: "Is this time convenient for you?", translation: "这个时间你方便吗？" },
     { word: "appreciate", phonetic: "/əˈpriːʃieɪt/", part: "v.", meaning: "感激；欣赏", example: "I really appreciate your help.", translation: "我真的很感谢你的帮助。" },
+    ...coreWords,
   ],
-  cet4: examWords,
-  cet6: examWords,
-  ielts: examWords,
+  cet4: [...examWords, ...coreWords],
+  cet6: [...examWords, ...coreWords],
+  ielts: [...examWords, ...coreWords],
 };
 
 type Screen = "library" | "plan" | "study" | "done" | "profile";
@@ -178,8 +235,11 @@ export default function WordApp() {
   }, []);
 
   const progress = Math.min(index / Math.max(daily, 1), 1);
-  const activeWords = wordBanks[library.id] ?? examWords;
-  const current = activeWords[index % activeWords.length];
+  const activeWords = useMemo(() => {
+    const words = wordBanks[library.id] ?? examWords;
+    return Array.from(new Map(words.map((item) => [item.word.toLowerCase(), item])).values());
+  }, [library.id]);
+  const current = activeWords[index] ?? activeWords[0];
   const languagePack = languagePacks.find((pack) => pack.id === languagePackId) ?? languagePacks[0];
   const studyNumber = Math.min(index + 1, daily);
   const remainingDays = Math.ceil(library.total / daily);
