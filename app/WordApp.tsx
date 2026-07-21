@@ -434,8 +434,8 @@ export default function WordApp() {
                   <span className="word-tag">{library.level}</span>
                   <h2>{current.word}</h2>
                   <div className="pronunciation-actions">
-                    <button className="sound-button" onClick={(event) => { event.stopPropagation(); speak(); }} aria-label={`播放${languagePack.name}发音`}>♪</button>
-                    <button className={`mic-button ${isListening ? "listening" : ""}`} onClick={(event) => { event.stopPropagation(); practiceSpeak(); }} aria-label="开始跟读">●</button>
+                    <button className="sound-button" onClick={(event) => { event.stopPropagation(); speak(); }} aria-label={`播放${languagePack.name}发音`}><span aria-hidden="true">🔊</span><b>听发音</b></button>
+                    <button className={`mic-button ${isListening ? "listening" : ""}`} onClick={(event) => { event.stopPropagation(); practiceSpeak(); }} aria-label="开始跟读"><span aria-hidden="true">🎙</span><b>{isListening ? "正在听…" : "开始跟读"}</b></button>
                   </div>
                   <p className="phonetic">{current.phonetic}</p>
                   {speechFeedback && <p className={`speech-feedback ${speechFeedback.startsWith("✓") ? "success" : ""}`}>{speechFeedback}</p>}
