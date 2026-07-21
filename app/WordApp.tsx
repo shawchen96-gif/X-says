@@ -25,6 +25,8 @@ type Word = {
 type CompactWord = { w: string; p: string; t: string; m: string; d: string; e: string; z: string; a: string };
 type DictionaryWord = Word & { books: string[] };
 type DictionaryMode = "auto" | "english" | "chinese";
+type WordStatus = "known" | "review";
+type WordListSwipe = { word: string; x: number; dragging: boolean };
 
 const WORD_DATA_VERSION = "20260721-examples-v3";
 
@@ -246,6 +248,8 @@ export default function WordApp() {
   const [wordQuery, setWordQuery] = useState("");
   const [visibleWords, setVisibleWords] = useState(60);
   const [expandedWord, setExpandedWord] = useState("");
+  const [wordStatuses, setWordStatuses] = useState<Record<string, WordStatus>>({});
+  const [wordListSwipe, setWordListSwipe] = useState<WordListSwipe>({ word: "", x: 0, dragging: false });
   const [dictionaryWords, setDictionaryWords] = useState<DictionaryWord[]>([]);
   const [dictionaryQuery, setDictionaryQuery] = useState("");
   const [dictionaryMode, setDictionaryMode] = useState<DictionaryMode>("auto");
@@ -255,6 +259,8 @@ export default function WordApp() {
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
   const answerLock = useRef(false);
+  const wordListStartX = useRef(0);
+  const wordListSwipeHandled = useRef(false);
 
   useEffect(() => {
     try {
@@ -262,6 +268,7 @@ export default function WordApp() {
       const savedUser = window.localStorage.getItem("wordflow-user-v1");
       const savedSession = window.localStorage.getItem("wordflow-session-v1");
       const savedLanguagePack = window.localStorage.getItem("xsays-language-pack");
+      const savedWordStatuses = window.localStorage.getItem("xsays-word-status-v1");
 
       if (savedPlan) {
         const parsed = JSON.parse(savedPlan) as { libraryId: string; daily: number };
@@ -270,6 +277,7 @@ export default function WordApp() {
       }
       if (savedUser) setUser({ ...emptyUser, ...(JSON.parse(savedUser) as LocalUser) });
       if (savedLanguagePack && languagePacks.some((pack) => pack.id === savedLanguagePack)) setLanguagePackId(savedLanguagePack);
+      if (savedWordStatuses) setWordStatuses(JSON.parse(savedWordStatuses) as Record<string, WordStatus>);
       if (savedSession) {
         const session = JSON.parse(savedSession) as LocalSession;
         if (session.date === dateKey() && session.index < session.daily) {
@@ -467,7 +475,7 @@ export default function WordApp() {
 
   const resetLocalData = () => {
     if (!window.confirm("确定清空这台设备上的学习记录吗？")) return;
-    ["wordflow-plan", "wordflow-user-v1", "wordflow-session-v1", "xsays-language-pack"].forEach((key) => window.localStorage.removeItem(key));
+    ["wordflow-plan", "wordflow-user-v1", "wordflow-session-v1", "xsays-language-pack", "xsays-word-status-v1"].forEach((key) => window.localStorage.removeItem(key));
     setUser(emptyUser);
     setLibrary(libraries[0]);
     setDaily(20);
@@ -476,6 +484,7 @@ export default function WordApp() {
     setReview(0);
     setHasSavedSession(false);
     setLanguagePackId("us");
+    setWordStatuses({});
     setScreen("library");
   };
 
@@ -509,6 +518,50 @@ export default function WordApp() {
     setDragging(false);
     if (Math.abs(dragX) > 90) answer(dragX > 0);
     else setDragX(0);
+  };
+
+  const markWordStatus = (word: string, status: WordStatus) => {
+    setWordStatuses((previous) => {
+      const next = { ...previous, [word]: status };
+      window.localStorage.setItem("xsays-word-status-v1", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const onWordListPointerDown = (event: React.PointerEvent<HTMLButtonElement>, word: string) => {
+    wordListStartX.current = event.clientX;
+    wordListSwipeHandled.current = false;
+    setWordListSwipe({ word, x: 0, dragging: true });
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onWordListPointerMove = (event: React.PointerEvent<HTMLButtonElement>, word: string) => {
+    if (!wordListSwipe.dragging || wordListSwipe.word !== word) return;
+    const x = Math.max(-150, Math.min(150, event.clientX - wordListStartX.current));
+    if (Math.abs(x) > 6) wordListSwipeHandled.current = true;
+    setWordListSwipe({ word, x, dragging: true });
+  };
+
+  const finishWordListSwipe = (word: string) => {
+    if (wordListSwipe.word !== word) return;
+    const x = wordListSwipe.x;
+    if (Math.abs(x) >= 65) {
+      const status: WordStatus = x > 0 ? "known" : "review";
+      markWordStatus(word, status);
+      setWordListSwipe({ word, x: x > 0 ? 420 : -420, dragging: false });
+      window.setTimeout(() => setWordListSwipe({ word: "", x: 0, dragging: false }), 180);
+    } else {
+      setWordListSwipe({ word: "", x: 0, dragging: false });
+    }
+    window.setTimeout(() => { wordListSwipeHandled.current = false; }, 260);
+  };
+
+  const toggleWordExample = (word: string) => {
+    if (wordListSwipeHandled.current) {
+      wordListSwipeHandled.current = false;
+      return;
+    }
+    setExpandedWord((current) => current === word ? "" : word);
   };
 
   const title = useMemo(() => {
@@ -579,17 +632,40 @@ export default function WordApp() {
               <>
                 <div className="wordlist-summary"><b>{filteredWords.length.toLocaleString()}</b> 个结果 <span>每次显示最多 60 个，继续下拉可加载更多</span></div>
                 <ol className="word-rows">
-                  {filteredWords.slice(0, visibleWords).map((item, itemIndex) => (
-                    <li key={item.word} className={expandedWord === item.word ? "expanded" : ""}>
-                      <span className="word-order">{String(itemIndex + 1).padStart(3, "0")}</span>
-                      <button className="word-row-main" onClick={() => setExpandedWord((word) => word === item.word ? "" : item.word)} aria-expanded={expandedWord === item.word}>
-                        <span className="word-row-copy"><b>{item.word}</b><small>{item.phonetic}</small><p>{item.part && <em>{item.part}</em>}{item.meaning}</p></span>
-                        <span className="word-row-chevron" aria-hidden="true">{expandedWord === item.word ? "⌃" : "⌄"}</span>
-                      </button>
-                      <button className="word-sound" onClick={() => speakText(item.word)} aria-label={`播放 ${item.word} 发音`}>🔊</button>
-                      {expandedWord === item.word && <div className="word-row-example"><span>EXAMPLE</span><q>{item.example}</q><p>{item.translation}</p><button onClick={() => speakText(item.example)}>🔊 听例句</button></div>}
-                    </li>
-                  ))}
+                  {filteredWords.slice(0, visibleWords).map((item, itemIndex) => {
+                    const status = wordStatuses[item.word];
+                    const isSwiping = wordListSwipe.word === item.word;
+                    return (
+                      <li key={item.word} className={`${expandedWord === item.word ? "expanded" : ""} ${status ? `status-${status}` : ""}`}>
+                        <div className="word-row-swipe-bg" aria-hidden="true"><span>记住了 →</span><span>← 再学习</span></div>
+                        <div
+                          className={`word-row-front ${isSwiping && wordListSwipe.dragging ? "dragging" : ""}`}
+                          style={{ transform: `translateX(${isSwiping ? wordListSwipe.x : 0}px)` }}
+                        >
+                          <span className="word-order">{String(itemIndex + 1).padStart(3, "0")}</span>
+                          <button
+                            className="word-row-main"
+                            onClick={() => toggleWordExample(item.word)}
+                            onPointerDown={(event) => onWordListPointerDown(event, item.word)}
+                            onPointerMove={(event) => onWordListPointerMove(event, item.word)}
+                            onPointerUp={() => finishWordListSwipe(item.word)}
+                            onPointerCancel={() => finishWordListSwipe(item.word)}
+                            aria-expanded={expandedWord === item.word}
+                          >
+                            <span className="word-row-copy"><b>{item.word}</b><small>{item.phonetic}</small><p>{item.part && <em>{item.part}</em>}{item.meaning}</p></span>
+                            <span className="word-row-chevron" aria-hidden="true">{expandedWord === item.word ? "⌃" : "⌄"}</span>
+                          </button>
+                          <button className="word-sound" onClick={() => speakText(item.word)} aria-label={`播放 ${item.word} 发音`}>🔊</button>
+                          <div className="word-row-swipe-hint" aria-live="polite">
+                            <span>← 再学习</span>
+                            {status && <b>{status === "known" ? "✓ 已记住" : "↺ 待复习"}</b>}
+                            <span>记住了 →</span>
+                          </div>
+                          {expandedWord === item.word && <div className="word-row-example"><span>EXAMPLE</span><q>{item.example}</q><p>{item.translation}</p><button onClick={() => speakText(item.example)}>🔊 听例句</button></div>}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ol>
                 {visibleWords < filteredWords.length && <button className="load-more" onClick={() => setVisibleWords((count) => count + 60)}>再显示 60 个</button>}
                 {!filteredWords.length && <div className="wordlist-state">没有找到相关单词</div>}
