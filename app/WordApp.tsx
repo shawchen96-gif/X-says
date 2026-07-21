@@ -207,6 +207,7 @@ export default function WordApp() {
   const [wordError, setWordError] = useState("");
   const [wordQuery, setWordQuery] = useState("");
   const [visibleWords, setVisibleWords] = useState(60);
+  const [expandedWord, setExpandedWord] = useState("");
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
@@ -301,6 +302,7 @@ export default function WordApp() {
     setLibrary(item);
     setWordQuery("");
     setVisibleWords(60);
+    setExpandedWord("");
     setWordLoading(!wordCache[item.id]);
     setScreen("wordlist");
   };
@@ -467,7 +469,7 @@ export default function WordApp() {
           <section className="content wordlist-screen">
             <div className={`wordlist-hero ${library.tone}`}>
               <span className="book-cover" aria-hidden="true"><b>{library.level}</b><i>{String(libraries.findIndex((item) => item.id === library.id) + 1).padStart(2, "0")}</i></span>
-              <div><span className="mini-label">完整词库</span><h2>{library.title}</h2><p>{wordLoading ? "正在读取词条…" : `${activeWords.length.toLocaleString()} 个真实词条`}</p></div>
+              <div className="wordlist-hero-copy"><span className="mini-label">完整词库</span><h2>{library.title}</h2><p>{wordLoading ? "正在读取词条…" : `${activeWords.length.toLocaleString()} 个真实词条`}</p><button className="wordlist-start" onClick={() => setScreen("plan")}>开始学习 <span>→</span></button></div>
             </div>
             <label className="word-search"><span aria-hidden="true">⌕</span><input value={wordQuery} onChange={(event) => { setWordQuery(event.target.value); setVisibleWords(60); }} placeholder="搜索英文或中文释义" aria-label="搜索词库" /></label>
             {wordLoading ? (
@@ -479,10 +481,14 @@ export default function WordApp() {
                 <div className="wordlist-summary"><b>{filteredWords.length.toLocaleString()}</b> 个结果 <span>每次显示最多 60 个，继续下拉可加载更多</span></div>
                 <ol className="word-rows">
                   {filteredWords.slice(0, visibleWords).map((item, itemIndex) => (
-                    <li key={item.word}>
+                    <li key={item.word} className={expandedWord === item.word ? "expanded" : ""}>
                       <span className="word-order">{String(itemIndex + 1).padStart(3, "0")}</span>
-                      <span className="word-row-copy"><b>{item.word}</b><small>{item.phonetic}</small><p>{item.part && <em>{item.part}</em>}{item.meaning}</p></span>
-                      <button onClick={() => speakText(item.word)} aria-label={`播放 ${item.word} 发音`}>🔊</button>
+                      <button className="word-row-main" onClick={() => setExpandedWord((word) => word === item.word ? "" : item.word)} aria-expanded={expandedWord === item.word}>
+                        <span className="word-row-copy"><b>{item.word}</b><small>{item.phonetic}</small><p>{item.part && <em>{item.part}</em>}{item.meaning}</p></span>
+                        <span className="word-row-chevron" aria-hidden="true">{expandedWord === item.word ? "⌃" : "⌄"}</span>
+                      </button>
+                      <button className="word-sound" onClick={() => speakText(item.word)} aria-label={`播放 ${item.word} 发音`}>🔊</button>
+                      {expandedWord === item.word && <div className="word-row-example"><span>EXAMPLE</span><q>{item.example}</q><p>{item.translation}</p><button onClick={() => speakText(item.example)}>🔊 听例句</button></div>}
                     </li>
                   ))}
                 </ol>
