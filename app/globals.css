@@ -21,7 +21,7 @@ body {
 }
 
 .page-shell { min-height: 100vh; display: flex; align-items: stretch; justify-content: center; padding: 0; background: #fbfcf9; }
-.phone-app { position: relative; width: 100%; max-width: 600px; height: 100dvh; min-height: 680px; overflow: hidden; background: #fbfcf9; }
+.phone-app { position: relative; width: 100%; max-width: 600px; height: 100dvh; min-height: 0; overflow: hidden; background: #fbfcf9; }
 .app-header { height: 102px; display: grid; grid-template-columns: 42px 1fr 52px; align-items: center; gap: 12px; padding: 20px 22px 10px; }
 .app-header h1 { margin: 1px 0 0; font-size: 18px; line-height: 1.1; letter-spacing: -.02em; }
 .eyebrow { margin: 0; color: #9aa39d; font: 700 9px/1.2 Arial; letter-spacing: .18em; }
@@ -58,9 +58,28 @@ body {
 
 .profile-hero>span{font-size:34px;border-radius:24px 24px 24px 10px}.profile-hero>small{display:block;margin-top:9px;color:#909a94;font-size:9px}.profile-grid{grid-template-columns:repeat(3,1fr);gap:8px}.profile-grid div{padding:15px 5px}.profile-grid b{font-size:23px}.profile-grid small{font-size:8px}.danger-row{margin-top:12px;color:#ad5b55}.danger-row>span{color:#ad5b55}
 
+/* Keep study actions inside every mobile viewport, including short screens. */
+.study-screen{height:100dvh;min-height:0;display:grid;grid-template-rows:45px minmax(0,1fr) auto auto;gap:9px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.card-stage{height:auto;min-height:0;padding:4px 3px}
+.word-card{height:calc(100% - 6px);min-height:0}
+.swipe-instruction{min-height:16px}
+.answer-actions{margin-top:0;padding-bottom:0}
+
 @media (max-width: 900px) {
   .page-shell { display: block; }
-  .phone-app { max-width: none; min-height: 100dvh; }
+  .phone-app { max-width: none; min-height: 0; }
 }
-@media (max-height: 760px) { .phone-app { min-height: 680px; }.word-main{padding-top:55px}.card-stage{min-height:400px}.content{padding-bottom:16px}.library-card{min-height:105px}.book-cover{height:80px} }
+@media (max-height: 700px) {
+  .study-screen{grid-template-rows:38px minmax(0,1fr) auto auto;gap:4px;padding-top:10px;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .study-topline{height:38px}
+  .word-main{padding:34px 22px 17px}
+  .word-main h2{font-size:32px;margin:15px 0 6px}
+  .definition{margin-top:9px}
+  .definition>p{margin:4px 0;line-height:1.55}
+  .example{margin-top:8px;padding:11px;gap:4px}
+  .answer-actions button{height:52px}
+  .content{padding-bottom:16px}
+  .library-card{min-height:105px}
+  .book-cover{height:80px}
+}
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
