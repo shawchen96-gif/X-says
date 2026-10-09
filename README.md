@@ -1,98 +1,29 @@
-# vinext-starter
+# X-says 英语词典与背词 App
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+项目的主要交付物是位于 `ios/` 的原生 iOS App。它使用 SwiftUI 开发，可通过 Xcode 安装到 iPhone，不是网页容器或 WebView。
 
-## Prerequisites
+## iOS App
 
-- Node.js `>=22.13.0`
+- 原生 SwiftUI 界面，最低支持 iOS 17
+- 七套离线词书，共 15,006 条学习词汇
+- ECDICT 离线英汉词典，共 770,611 条有效记录
+- 英文前缀查询与中文释义查询
+- 系统英语发音
+- 滑动背词、复习列表、连续学习和本机进度
+- 学习数据保存在 iPhone 的 `UserDefaults` 中
 
-## Quick Start
+使用 Xcode 打开 `ios/XSays.xcodeproj`。详细的签名和真机运行步骤见 `ios/README.md`。
+
+## 更新词典
+
+完整词典源文件是 `work/ECDICT/ecdict.csv`。更新源数据后运行：
 
 ```bash
-npm install
-npm run dev
-npm run build
+python3 ios/scripts/build_dictionary.py
 ```
 
-This starter does not use `wrangler.jsonc`.
+生成的 `ios/XSays/AppData/Dictionary.sqlite` 会直接随 App 安装，查询不需要联网。
 
-## Included Shape
+## 旧 Web 原型
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+根目录的 `app/`、`public/`、`worker/` 和 `docs/` 是早期 Web 原型及发布产物，暂时保留用于对照。iOS App 不加载这些网页文件，也不依赖 Node.js 或 Cloudflare 才能运行。

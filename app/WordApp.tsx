@@ -263,6 +263,13 @@ export default function WordApp() {
   const wordListSwipeHandled = useRef(false);
 
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      const baseUrl = new URL("./", document.baseURI);
+      navigator.serviceWorker.register(new URL("sw.js", baseUrl), { scope: baseUrl.pathname }).catch(() => {
+        // The app remains fully usable online when service workers are unavailable.
+      });
+    }
+
     try {
       const savedPlan = window.localStorage.getItem("wordflow-plan");
       const savedUser = window.localStorage.getItem("wordflow-user-v1");

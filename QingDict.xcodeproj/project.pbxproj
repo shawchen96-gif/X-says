@@ -1,0 +1,201 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B00000000000000000000001 /* QingDictApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000001 /* QingDictApp.swift */; };
+		B00000000000000000000002 /* DictionaryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000002 /* DictionaryEntry.swift */; };
+		B00000000000000000000003 /* DictionaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000003 /* DictionaryStore.swift */; };
+		B00000000000000000000004 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000004 /* RootView.swift */; };
+		B00000000000000000000005 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000005 /* SearchView.swift */; };
+		B00000000000000000000006 /* EntryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000006 /* EntryViews.swift */; };
+		B00000000000000000000007 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000007 /* FavoritesView.swift */; };
+		B00000000000000000000008 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000008 /* SettingsView.swift */; };
+		B00000000000000000000009 /* starter_dictionary.json in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000009 /* starter_dictionary.json */; };
+		B0000000000000000000000A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000A /* PrivacyInfo.xcprivacy */; };
+		B0000000000000000000000B /* DictionaryEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000B /* DictionaryEntryTests.swift */; };
+		B0000000000000000000000C /* ecdict_dictionary.json in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* ecdict_dictionary.json */; };
+		B0000000000000000000000D /* ECDICT-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000F /* ECDICT-LICENSE.txt */; };
+		B0000000000000000000000E /* TATOEBA-ATTRIBUTION.txt in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000010 /* TATOEBA-ATTRIBUTION.txt */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C00000000000000000000001 = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D00000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E00000000000000000000001;
+			remoteInfo = QingDict;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A00000000000000000000001 /* QingDictApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QingDictApp.swift; sourceTree = "<group>"; };
+		A00000000000000000000002 /* DictionaryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryEntry.swift; sourceTree = "<group>"; };
+		A00000000000000000000003 /* DictionaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryStore.swift; sourceTree = "<group>"; };
+		A00000000000000000000004 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A00000000000000000000005 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		A00000000000000000000006 /* EntryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryViews.swift; sourceTree = "<group>"; };
+		A00000000000000000000007 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		A00000000000000000000008 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A00000000000000000000009 /* starter_dictionary.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = starter_dictionary.json; sourceTree = "<group>"; };
+		A0000000000000000000000A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A0000000000000000000000B /* DictionaryEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryEntryTests.swift; sourceTree = "<group>"; };
+		A0000000000000000000000C /* QingDict.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QingDict.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0000000000000000000000D /* QingDictTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QingDictTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0000000000000000000000E /* ecdict_dictionary.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ecdict_dictionary.json; sourceTree = "<group>"; };
+		A0000000000000000000000F /* ECDICT-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "ECDICT-LICENSE.txt"; sourceTree = "<group>"; };
+		A00000000000000000000010 /* TATOEBA-ATTRIBUTION.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "TATOEBA-ATTRIBUTION.txt"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F00000000000000000000001 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		F00000000000000000000002 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D00000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				D00000000000000000000003 /* QingDict */,
+				D00000000000000000000008 /* QingDictTests */,
+				D00000000000000000000009 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D00000000000000000000003 /* QingDict */ = {
+			isa = PBXGroup;
+			children = (
+				D00000000000000000000004 /* App */,
+				D00000000000000000000005 /* Models */,
+				D00000000000000000000006 /* Services */,
+				D00000000000000000000007 /* Views */,
+				D0000000000000000000000A /* Resources */,
+			);
+			path = QingDict;
+			sourceTree = "<group>";
+		};
+		D00000000000000000000004 /* App */ = {isa = PBXGroup; children = (A00000000000000000000001 /* QingDictApp.swift */,); path = App; sourceTree = "<group>"; };
+		D00000000000000000000005 /* Models */ = {isa = PBXGroup; children = (A00000000000000000000002 /* DictionaryEntry.swift */,); path = Models; sourceTree = "<group>"; };
+		D00000000000000000000006 /* Services */ = {isa = PBXGroup; children = (A00000000000000000000003 /* DictionaryStore.swift */,); path = Services; sourceTree = "<group>"; };
+		D00000000000000000000007 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000004 /* RootView.swift */,
+				A00000000000000000000005 /* SearchView.swift */,
+				A00000000000000000000006 /* EntryViews.swift */,
+				A00000000000000000000007 /* FavoritesView.swift */,
+				A00000000000000000000008 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D00000000000000000000008 /* QingDictTests */ = {isa = PBXGroup; children = (A0000000000000000000000B /* DictionaryEntryTests.swift */,); path = QingDictTests; sourceTree = "<group>"; };
+		D00000000000000000000009 /* Products */ = {isa = PBXGroup; children = (A0000000000000000000000C /* QingDict.app */, A0000000000000000000000D /* QingDictTests.xctest */,); name = Products; sourceTree = "<group>"; };
+		D0000000000000000000000A /* Resources */ = {isa = PBXGroup; children = (A00000000000000000000009 /* starter_dictionary.json */, A0000000000000000000000E /* ecdict_dictionary.json */, A0000000000000000000000F /* ECDICT-LICENSE.txt */, A00000000000000000000010 /* TATOEBA-ATTRIBUTION.txt */, A0000000000000000000000A /* PrivacyInfo.xcprivacy */,); path = Resources; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E00000000000000000000001 /* QingDict */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 900000000000000000000002;
+			buildPhases = (700000000000000000000001, F00000000000000000000001, 700000000000000000000002,);
+			buildRules = ();
+			dependencies = ();
+			name = QingDict;
+			productName = QingDict;
+			productReference = A0000000000000000000000C /* QingDict.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E00000000000000000000002 /* QingDictTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 900000000000000000000003;
+			buildPhases = (700000000000000000000003, F00000000000000000000002, 700000000000000000000004,);
+			buildRules = ();
+			dependencies = (C00000000000000000000002,);
+			name = QingDictTests;
+			productName = QingDictTests;
+			productReference = A0000000000000000000000D /* QingDictTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D00000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					E00000000000000000000001 = {CreatedOnToolsVersion = 16.0; };
+					E00000000000000000000002 = {CreatedOnToolsVersion = 16.0; TestTargetID = E00000000000000000000001; };
+				};
+			};
+			buildConfigurationList = 900000000000000000000001;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base, "zh-Hans",);
+			mainGroup = D00000000000000000000002;
+			productRefGroup = D00000000000000000000009 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (E00000000000000000000001 /* QingDict */, E00000000000000000000002 /* QingDictTests */,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		700000000000000000000002 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B00000000000000000000009 /* starter_dictionary.json in Resources */, B0000000000000000000000C /* ecdict_dictionary.json in Resources */, B0000000000000000000000D /* ECDICT-LICENSE.txt in Resources */, B0000000000000000000000E /* TATOEBA-ATTRIBUTION.txt in Resources */, B0000000000000000000000A /* PrivacyInfo.xcprivacy in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+		700000000000000000000004 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		700000000000000000000001 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B00000000000000000000001, B00000000000000000000002, B00000000000000000000003, B00000000000000000000004, B00000000000000000000005, B00000000000000000000006, B00000000000000000000007, B00000000000000000000008,); runOnlyForDeploymentPostprocessing = 0; };
+		700000000000000000000003 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B0000000000000000000000B /* DictionaryEntryTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C00000000000000000000002 = {isa = PBXTargetDependency; target = E00000000000000000000001 /* QingDict */; targetProxy = C00000000000000000000001; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		800000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_OPTIMIZATION_LEVEL = 0; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+		800000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; GCC_C_LANGUAGE_STANDARD = gnu17; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; VALIDATE_PRODUCT = YES; }; name = Release; };
+		800000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "清词";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.QingDict;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		800000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "清词"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.example.QingDict; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+		800000000000000000000005 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.example.QingDictTests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QingDict.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QingDict"; }; name = Debug; };
+		800000000000000000000006 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.example.QingDictTests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QingDict.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QingDict"; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		900000000000000000000001 = {isa = XCConfigurationList; buildConfigurations = (800000000000000000000001 /* Debug */, 800000000000000000000002 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		900000000000000000000002 = {isa = XCConfigurationList; buildConfigurations = (800000000000000000000003 /* Debug */, 800000000000000000000004 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		900000000000000000000003 = {isa = XCConfigurationList; buildConfigurations = (800000000000000000000005 /* Debug */, 800000000000000000000006 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = D00000000000000000000001 /* Project object */;
+}

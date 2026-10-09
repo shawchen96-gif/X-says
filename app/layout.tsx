@@ -11,7 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "X-says · 把单词说出来",
     description: "用滑动单词卡完成每日词汇任务。",
+    manifest: "/manifest.webmanifest",
     icons: { icon: "/xsays-icon.png", apple: "/xsays-icon.png" },
+    appleWebApp: { capable: true, statusBarStyle: "default", title: "X-says" },
     openGraph: {
       title: "X-says · 把单词说出来",
       description: "选词书、定节奏，用滑动卡片轻松背单词。",

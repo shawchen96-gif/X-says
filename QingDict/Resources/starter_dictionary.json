@@ -1,0 +1,68 @@
+[
+  {
+    "id": "demo-zh-nihao",
+    "headword": "你好",
+    "alternate": null,
+    "pronunciation": "nǐ hǎo",
+    "partOfSpeech": "感叹词",
+    "direction": "zhToEn",
+    "definitions": ["hello", "hi; a common greeting"],
+    "examples": [{"source": "你好，很高兴认识你。", "translation": "Hello, nice to meet you."}],
+    "sourceName": "清词原创演示",
+    "sourceURL": null,
+    "license": "App demo content"
+  },
+  {
+    "id": "demo-zh-qing",
+    "headword": "清",
+    "alternate": null,
+    "pronunciation": "qīng",
+    "partOfSpeech": "形容词",
+    "direction": "zhToEn",
+    "definitions": ["clear; pure", "quiet; distinct"],
+    "examples": [{"source": "雨后空气很清新。", "translation": "The air is fresh after the rain."}],
+    "sourceName": "清词原创演示",
+    "sourceURL": null,
+    "license": "App demo content"
+  },
+  {
+    "id": "demo-en-clear",
+    "headword": "clear",
+    "alternate": null,
+    "pronunciation": "/klɪə/",
+    "partOfSpeech": "adjective",
+    "direction": "enToZh",
+    "definitions": ["清楚的；易懂的", "透明的；晴朗的"],
+    "examples": [{"source": "Her explanation was clear.", "translation": "她的解释很清楚。"}],
+    "sourceName": "清词原创演示",
+    "sourceURL": null,
+    "license": "App demo content"
+  },
+  {
+    "id": "demo-en-dictionary",
+    "headword": "dictionary",
+    "alternate": null,
+    "pronunciation": "/ˈdɪkʃənəri/",
+    "partOfSpeech": "noun",
+    "direction": "enToZh",
+    "definitions": ["字典；词典", "按规则保存键和值的数据结构"],
+    "examples": [{"source": "I looked up the word in a dictionary.", "translation": "我在字典里查了这个词。"}],
+    "sourceName": "清词原创演示",
+    "sourceURL": null,
+    "license": "App demo content"
+  },
+  {
+    "id": "demo-en-quiet",
+    "headword": "quiet",
+    "alternate": null,
+    "pronunciation": "/ˈkwaɪət/",
+    "partOfSpeech": "adjective",
+    "direction": "enToZh",
+    "definitions": ["安静的；轻声的", "平静的；不受打扰的"],
+    "examples": [{"source": "The room is quiet.", "translation": "房间里很安静。"}],
+    "sourceName": "清词原创演示",
+    "sourceURL": null,
+    "license": "App demo content"
+  }
+]
+

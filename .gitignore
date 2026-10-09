@@ -46,3 +46,12 @@ next-env.d.ts
 .dev-pid
 X-says-GitHub-Pages.zip
 /X-says-GitHub-Pages/
+
+# Xcode personal state and local source archive
+**/xcuserdata/
+**/*.xcuserstate
+/QingDict-iOS18-source.zip
+
+# Python cache
+__pycache__/
+*.pyc
