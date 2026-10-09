@@ -1,0 +1,16 @@
+{
+  "name": "X-says · 把单词说出来",
+  "short_name": "X-says",
+  "description": "选词书、定节奏，用滑动单词卡轻松学习。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbfcf9",
+  "theme_color": "#2ebd85",
+  "lang": "zh-CN",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "./xsays-icon.png", "sizes": "1254x1254", "type": "image/png", "purpose": "any" },
+    { "src": "./xsays-icon.png", "sizes": "1254x1254", "type": "image/png", "purpose": "maskable" }
+  ]
+}

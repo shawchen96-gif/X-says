@@ -1,5 +1,7 @@
 "use client";
 
+import { prepareStudy } from "./study-progress.mjs";
+
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 type Library = {
@@ -189,7 +191,10 @@ type LocalUser = {
   lastStudyDate: string;
 };
 
+type StudyProgress = { order: string[]; cursor: number };
+
 type LocalSession = {
+  start?: number;
   date: string;
   libraryId: string;
   daily: number;
@@ -234,6 +239,8 @@ export default function WordApp() {
   const [library, setLibrary] = useState<Library>(libraries[0]);
   const [daily, setDaily] = useState(20);
   const [index, setIndex] = useState(0);
+  const [studyStart, setStudyStart] = useState(0);
+  const [studyProgress, setStudyProgress] = useState<Record<string, StudyProgress>>({});
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [review, setReview] = useState(0);
@@ -271,6 +278,8 @@ export default function WordApp() {
     }
 
     try {
+      const savedProgress = window.localStorage.getItem("xsays-study-progress-v1");
+      if (savedProgress) setStudyProgress(JSON.parse(savedProgress));
       const savedPlan = window.localStorage.getItem("wordflow-plan");
       const savedUser = window.localStorage.getItem("wordflow-user-v1");
       const savedSession = window.localStorage.getItem("wordflow-session-v1");
@@ -291,6 +300,7 @@ export default function WordApp() {
           setLibrary(libraries.find((item) => item.id === session.libraryId) ?? libraries[0]);
           setDaily(session.daily);
           setIndex(session.index);
+          setStudyStart(session.start ?? 0);
           setKnown(session.known);
           setReview(session.review);
           setHasSavedSession(true);
@@ -405,7 +415,11 @@ export default function WordApp() {
       .slice(0, 80)
       .map((result) => result.item);
   }, [deferredDictionaryQuery, dictionaryWords, effectiveDictionaryMode]);
-  const current = activeWords[index] ?? activeWords[0];
+  const orderedStudyWords = useMemo(() => {
+    const byWord = new Map(activeWords.map((word) => [word.word.toLowerCase(), word]));
+    return (studyProgress[library.id]?.order ?? []).map((word) => byWord.get(word)).filter((word): word is Word => Boolean(word));
+  }, [activeWords, studyProgress, library.id]);
+  const current = orderedStudyWords[(studyStart + index) % orderedStudyWords.length] ?? activeWords[0];
   const languagePack = languagePacks.find((pack) => pack.id === languagePackId) ?? languagePacks[0];
   const studyNumber = Math.min(index + 1, daily);
   const remainingDays = Math.ceil(library.total / daily);
@@ -426,10 +440,21 @@ export default function WordApp() {
     const session = window.localStorage.getItem("wordflow-session-v1");
     const parsed = session ? JSON.parse(session) as LocalSession : null;
     const canResume = parsed?.date === dateKey() && parsed.libraryId === library.id && parsed.daily === daily && parsed.index < daily;
-    setIndex(canResume ? parsed.index : 0);
-    setKnown(canResume ? parsed.known : 0);
-    setReview(canResume ? parsed.review : 0);
-    setHasSavedSession(Boolean(canResume));
+    const keys = activeWords.map((word) => word.word.toLowerCase());
+    const prepared = prepareStudy(keys, studyProgress[library.id], parsed, Boolean(canResume));
+    const { start, resume } = prepared;
+    const nextProgress = { ...studyProgress, [library.id]: prepared.progress };
+    setStudyProgress(nextProgress);
+    window.localStorage.setItem("xsays-study-progress-v1", JSON.stringify(nextProgress));
+    setStudyStart(start);
+    setIndex(resume ? parsed!.index : 0);
+    setKnown(resume ? parsed!.known : 0);
+    setReview(resume ? parsed!.review : 0);
+    const nextSession: LocalSession = { date: dateKey(), libraryId: library.id, daily, start, index: resume ? parsed!.index : 0, known: resume ? parsed!.known : 0, review: resume ? parsed!.review : 0 };
+    window.localStorage.setItem("wordflow-session-v1", JSON.stringify(nextSession));
+    setHasSavedSession(true);
+    answerLock.current = false;
+    setDragX(0);
     setFlipped(false);
     setShowDefinition(false);
     setScreen("study");
@@ -445,6 +470,9 @@ export default function WordApp() {
     const finishing = nextIndex >= daily;
     setKnown(nextKnown);
     setReview(nextReview);
+    const nextProgress = { ...studyProgress, [library.id]: { ...studyProgress[library.id], cursor: studyStart + nextIndex } };
+    setStudyProgress(nextProgress);
+    window.localStorage.setItem("xsays-study-progress-v1", JSON.stringify(nextProgress));
 
     setUser((previous) => {
       const today = dateKey();
@@ -467,7 +495,7 @@ export default function WordApp() {
       setScreen("done");
       answerLock.current = false;
     } else {
-      const session: LocalSession = { date: dateKey(), libraryId: library.id, daily, index: nextIndex, known: nextKnown, review: nextReview };
+      const session: LocalSession = { date: dateKey(), libraryId: library.id, daily, start: studyStart, index: nextIndex, known: nextKnown, review: nextReview };
       window.localStorage.setItem("wordflow-session-v1", JSON.stringify(session));
       setHasSavedSession(true);
       setDragX(remembered ? 520 : -520);
@@ -482,8 +510,10 @@ export default function WordApp() {
 
   const resetLocalData = () => {
     if (!window.confirm("确定清空这台设备上的学习记录吗？")) return;
-    ["wordflow-plan", "wordflow-user-v1", "wordflow-session-v1", "xsays-language-pack", "xsays-word-status-v1"].forEach((key) => window.localStorage.removeItem(key));
+    ["wordflow-plan", "wordflow-user-v1", "wordflow-session-v1", "xsays-language-pack", "xsays-word-status-v1", "xsays-study-progress-v1"].forEach((key) => window.localStorage.removeItem(key));
     setUser(emptyUser);
+    setStudyProgress({});
+    setStudyStart(0);
     setLibrary(libraries[0]);
     setDaily(20);
     setIndex(0);
@@ -705,7 +735,7 @@ export default function WordApp() {
               <div><span>◎</span><p><b>{remainingDays} 天</b><small>预计完成词书</small></p></div>
             </div>
             <button className="primary-button" disabled={wordLoading || Boolean(wordError)} onClick={startStudy}>{wordLoading ? "正在加载词库…" : "开始今日学习"} <span>→</span></button>
-            <p className="tip-line">◆ 你可以随时在「我的」中调整计划</p>
+            <p className="tip-line">◆ 随机顺序自动保存，接着上次进度学习；学完整本后循环</p>
           </section>
         )}
 
